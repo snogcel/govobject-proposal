@@ -2,9 +2,163 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>govobject-proposal</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://dev-test.dash.org:3001/socket.io/socket.io.js"></script>
+    <script src="bitcore-lib-dash.js"></script>
+
+    <script type="text/javascript">
+
+        var Bitcore = require('bitcore-lib-dash');
+
+        eventToListenTo = 'tx';
+        room = 'inv';
+
+        var socket = io("https://dev-test.dash.org:3001/");
+        socket.on('connect', function() {
+            // Join the room.
+            socket.emit('subscribe', room);
+            console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
+        });
+
+        socket.on(eventToListenTo, function(data) {
+
+        });
+
+        $(document).ready(function() {
+
+            $('#formSubmit').click(function() {
+
+                var gov = new Bitcore.GovObject.Proposal();
+
+                gov.end_epoch = document.getElementById('end_epoch').value || null;
+                gov.payment_address = document.getElementById('payment_address').value;
+                //gov.payment_amount = document.getElementById('payment_amount').value;
+                gov.payment_amount = parseFloat(document.getElementById('payment_amount').value);
+                gov.proposal_name = document.getElementById('proposal_name').value;
+                gov.start_epoch = document.getElementById('start_epoch').value || null;
+                gov.type = parseInt(document.getElementById('type').value);
+                gov.url = document.getElementById('url').value;
+
+                document.getElementById('dataHex').innerHTML = gov.uncheckedSerialize();
+
+                document.getElementById('prepareProposal').innerHTML = "dash-cli gobject submit "+document.getElementById('parentHash').value+" "+document.getElementById('revision').value+" "+document.getElementById('time').value+" "+gov.uncheckedSerialize();
+
+                if (document.getElementById('feeTxid').value) {
+                    document.getElementById('submitProposal').innerHTML = "dash-cli gobject submit " + document.getElementById('parentHash').value + " " + document.getElementById('revision').value + " " + document.getElementById('time').value + " " + gov.uncheckedSerialize() + " " + document.getElementById('feeTxid').value;
+                }
+
+            });
+        });
+
+    </script>
+
+    <style type="text/css">
+        textarea { background-color:#fafafa !important; }
+    </style>
+
 </head>
 <body>
+
+<div class="col-xs-10 col-xs-offset-1">
+
+<div class="row" style="margin-top:4em;">
+    <div class="col-xs-8 col-xs-offset-2">
+
+        <form>
+            <div class="form-group">
+                <label for="dataHex">data-hex:</label>
+                <textarea class="form-control" id="dataHex" rows="4" placeholder=""></textarea>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<div class="row" style="margin-top:2em;">
+    <div class="col-xs-4 col-xs-offset-2">
+
+        <form>
+            <div class="form-group">
+                <label for="end_epoch">end_epoch:</label>
+                <input type="text" class="form-control" id="end_epoch" value="" placeholder="">
+            </div>
+            <div class="form-group">
+                <label for="payment_address">payment_address:</label>
+                <input type="text" class="form-control" id="payment_address" value="yTC62huR4YQEPn9AJHjnQxxreHSbgAoatV" placeholder="yTC62huR4YQEPn9AJHjnQxxreHSbgAoatV">
+            </div>
+            <div class="form-group">
+                <label for="payment_amount">payment_amount:</label>
+                <input type="text" class="form-control" id="payment_amount" value="39.23" placeholder="39.23">
+            </div>
+            <div class="form-group">
+                <label for="proposal_name">proposal_name:</label>
+                <input type="text" class="form-control" id="proposal_name" value="我想喝一點點無龍茶" placeholder="我想喝一點點無龍茶">
+            </div>
+            <div class="form-group">
+                <label for="start_epoch">start_epoch:</label>
+                <input type="text" class="form-control" id="start_epoch" value="" placeholder="">
+            </div>
+            <div class="form-group">
+                <label for="type">type:</label>
+                <input type="text" class="form-control" id="type" value="1" placeholder="1">
+            </div>
+            <div class="form-group">
+                <label for="url">url:</label>
+                <input type="text" class="form-control" id="url" value="blah.com" placeholder="blah.com">
+            </div>
+
+            <div class="form-group hidden">
+                <label for="apiEndpoint">apiEndpoint:</label>
+                <input type="text" class="form-control" id="apiEndpoint" value="https://dev-test.dash.org:3001/insight-api-dash" placeholder="https://dev-test.dash.org:3001/insight-api-dash">
+            </div>
+
+            <div type="submit" class="btn btn-primary" id="formSubmit">Submit</div>
+        </form>
+
+    </div>
+
+    <div class="col-xs-4">
+
+        <form>
+
+            <div class="form-group">
+                <label for="parentHash">parent-hash:</label>
+                <input type="text" class="form-control" id="parentHash" value="0" placeholder="0">
+            </div>
+
+            <div class="form-group">
+                <label for="revision">revision:</label>
+                <input type="text" class="form-control" id="revision" value="1" placeholder="1">
+            </div>
+
+            <div class="form-group">
+                <label for="time">time:</label>
+                <input type="text" class="form-control" id="time" value="1474049452" placeholder="1474049452">
+            </div>
+
+            <div class="form-group">
+                <label for="feeTxid">fee-txid:</label>
+                <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
+            </div>
+
+            <div class="form-group">
+                <label for="prepareProposal">prepare proposal:</label>
+                <textarea class="form-control" id="prepareProposal" rows="3" placeholder=""></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="submitProposal">submit proposal:</label>
+                <textarea class="form-control" id="submitProposal" rows="3" placeholder=""></textarea>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+</div>
 
 </body>
 </html>
