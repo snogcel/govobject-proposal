@@ -75,7 +75,7 @@
 <div class="col-xs-10 col-xs-offset-1">
 
     <div class="row" style="margin-top:2em;">
-        <div class="col-xs-12"><h1>Budget Proposal</h1></div>
+        <div class="col-xs-12"><h1>Dash Governance Proposal Creation</h1></div>
     </div>
 
     <div class="row" style="margin-top:1em;">
@@ -84,66 +84,60 @@
             <form>
 
                 <div class="form-group">
-                    <label for="name">name:</label>
-                    <input type="text" class="form-control" id="name" value="我想喝一點點無龍茶" placeholder="我想喝一點點無龍茶">
+                    <label for="name">Proposal Name:</label>
+                    <input type="text" class="form-control" id="name" value="" placeholder="proposal-name">
                 </div>
 
                 <div class="form-group">
-                    <label for="url">url:</label>
-                    <input type="text" class="form-control" id="url" value="blah.com" placeholder="blah.com">
+                    <label for="url">Proposal URL:</label>
+                    <input type="text" class="form-control" id="url" value="" placeholder="https://www.dashcentral.org/p/proposal-name">
                 </div>
 
                 <div class="form-group">
-                    <label for="payment_address">payment_address:</label>
-                    <input type="text" class="form-control" id="payment_address" value="yTC62huR4YQEPn9AJHjnQxxreHSbgAoatV" placeholder="yTC62huR4YQEPn9AJHjnQxxreHSbgAoatV">
+                    <label for="payment_address">Payment Address:</label>
+                    <input type="text" class="form-control" id="payment_address" value="" placeholder="">
                 </div>
 
                 <div class="form-group">
-                    <label for="payment_amount">payment_amount:</label>
-                    <input type="text" class="form-control" id="payment_amount" value="39.23" placeholder="39.23">
+                    <label for="payment_amount">Payment Amount in Dash</label>
+                    <input type="text" class="form-control" id="payment_amount" value="" placeholder="0">
                 </div>
 
                 <div class="form-group">
-                    <label for="start_epoch">start date:</label>
+                    <label for="start_epoch">Proposal Start Date:</label>
                     <input type="text" class="form-control" id="start_epoch" value="" placeholder="">
                 </div>
 
                 <div class="form-group">
-                    <label for="end_epoch">end date:</label>
+                    <label for="end_epoch">Proposal End Date:</label>
                     <input type="text" class="form-control" id="end_epoch" value="" placeholder="">
                 </div>
+
+                <div type="submit" class="btn btn-primary" id="formSubmit">Create Proposal</div>
+
+                <hr>
 
                 <div class="form-group" style="display:none;">
                     <label for="type">type:</label>
                     <input type="text" class="form-control" id="type" value="1" placeholder="1">
                 </div>
 
-                <div type="submit" class="btn btn-primary" id="formSubmit">Create Proposal</div>
-
-            </form>
-
-        </div>
-
-        <div class="col-xs-6">
-
-            <form>
-
-                <div class="form-group">
+                <div class="form-group" style="display:none;">
                     <label for="parentHash">parent-hash:</label>
                     <input type="text" class="form-control" id="parentHash" value="0" placeholder="0">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="display:none;">
                     <label for="revision">revision:</label>
                     <input type="text" class="form-control" id="revision" value="1" placeholder="1">
                 </div>
 
-                <div class="form-group">
-                    <label for="time">time:</label>
-                    <input type="text" class="form-control" id="time" value="1474049452" placeholder="1474049452">
+                <div class="form-group" style="display:none;">
+                    <label for="time">Creation Time:</label>
+                    <input type="text" class="form-control" id="time" value="" placeholder="">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="display:none;">
                     <label for="feeTxid">fee-txid:</label>
                     <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
                 </div>
