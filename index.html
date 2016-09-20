@@ -9,26 +9,11 @@
     <script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="https://dev-test.dash.org:3001/socket.io/socket.io.js"></script>
     <script src="bitcore-lib-dash.js"></script>
 
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
-
-        eventToListenTo = 'tx';
-        room = 'inv';
-
-        var socket = io("https://dev-test.dash.org:3001/");
-        socket.on('connect', function() {
-            // Join the room.
-            socket.emit('subscribe', room);
-            console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
-        });
-
-        socket.on(eventToListenTo, function(data) {
-
-        });
 
         $(document).ready(function() {
 
