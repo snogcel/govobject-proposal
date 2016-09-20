@@ -53,10 +53,10 @@
 
                 document.getElementById('dataHex').innerHTML = gov.uncheckedSerialize();
 
-                document.getElementById('prepareProposal').innerHTML = "dash-cli gobject submit "+document.getElementById('parentHash').value+" "+document.getElementById('revision').value+" "+document.getElementById('time').value+" "+gov.uncheckedSerialize();
+                document.getElementById('prepareProposal').innerHTML = "gobject submit "+document.getElementById('parentHash').value+" "+document.getElementById('revision').value+" "+document.getElementById('time').value+" "+gov.uncheckedSerialize();
 
                 if (document.getElementById('feeTxid').value) {
-                    document.getElementById('submitProposal').innerHTML = "dash-cli gobject submit " + document.getElementById('parentHash').value + " " + document.getElementById('revision').value + " " + document.getElementById('time').value + " " + gov.uncheckedSerialize() + " " + document.getElementById('feeTxid').value;
+                    document.getElementById('submitProposal').innerHTML = "gobject submit " + document.getElementById('parentHash').value + " " + document.getElementById('revision').value + " " + document.getElementById('time').value + " " + gov.uncheckedSerialize() + " " + document.getElementById('feeTxid').value;
                 }
 
             });
