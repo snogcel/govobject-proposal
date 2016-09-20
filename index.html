@@ -17,10 +17,10 @@
 
         $(document).ready(function() {
 
-            var opts = { dateFormat: "@" }; // unix date format
+            var opts = { dateFormat: $.datepicker.ISO_8601 };
 
-            $('#start_epoch').datepicker(opts);
-            $('#end_epoch').datepicker(opts);
+            $('#start_epoch').datepicker(opts, 'getdate');
+            $('#end_epoch').datepicker(opts, 'getdate');
 
             $('#dataHex').click(function() {
                copyToClipboard($(this).attr('id'));
@@ -38,13 +38,18 @@
 
                 var gov = new Bitcore.GovObject.Proposal();
 
-                gov.end_epoch = document.getElementById('end_epoch').value || null;
+                // proposal basic fields
+                gov.name = document.getElementById('name').value;
+                gov.url = document.getElementById('url').value;
                 gov.payment_address = document.getElementById('payment_address').value;
                 gov.payment_amount = parseFloat(document.getElementById('payment_amount').value);
-                gov.name = document.getElementById('name').value;
-                gov.start_epoch = document.getElementById('start_epoch').value || null;
+
+                // format dates for gobject serialization
+                gov.start_epoch = (new Date(document.getElementById('start_epoch').value) / 1000) || null;
+                gov.end_epoch = (new Date(document.getElementById('end_epoch').value) / 1000) || null;
+
+                // hidden elements
                 gov.type = parseInt(document.getElementById('type').value);
-                gov.url = document.getElementById('url').value;
 
                 document.getElementById('dataHex').innerHTML = gov.uncheckedSerialize();
 
