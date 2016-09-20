@@ -35,9 +35,8 @@
 
                 gov.end_epoch = document.getElementById('end_epoch').value || null;
                 gov.payment_address = document.getElementById('payment_address').value;
-                //gov.payment_amount = document.getElementById('payment_amount').value;
                 gov.payment_amount = parseFloat(document.getElementById('payment_amount').value);
-                gov.proposal_name = document.getElementById('proposal_name').value;
+                gov.name = document.getElementById('name').value;
                 gov.start_epoch = document.getElementById('start_epoch').value || null;
                 gov.type = parseInt(document.getElementById('type').value);
                 gov.url = document.getElementById('url').value;
@@ -94,8 +93,8 @@
                 <input type="text" class="form-control" id="payment_amount" value="39.23" placeholder="39.23">
             </div>
             <div class="form-group">
-                <label for="proposal_name">proposal_name:</label>
-                <input type="text" class="form-control" id="proposal_name" value="我想喝一點點無龍茶" placeholder="我想喝一點點無龍茶">
+                <label for="name">name:</label>
+                <input type="text" class="form-control" id="name" value="我想喝一點點無龍茶" placeholder="我想喝一點點無龍茶">
             </div>
             <div class="form-group">
                 <label for="start_epoch">start_epoch:</label>

@@ -3531,9 +3531,9 @@ inherits(Proposal,GovObject);
 Proposal.prototype.dataHex = function() {
     var _govObj = {
         end_epoch: this.end_epoch,
+        name: this._toASCII(this.name),
         payment_address: this.payment_address,
         payment_amount: this.payment_amount,
-        proposal_name: this._toASCII(this.proposal_name),
         start_epoch: this.start_epoch,
         type: this.type,
         url: this.url
@@ -3544,9 +3544,9 @@ Proposal.prototype.dataHex = function() {
 
 Proposal.prototype._newGovObject = function() {
     this.end_epoch = "";
+    this.name = "";
     this.payment_address = "";
     this.payment_amount = "";
-    this.proposal_name = "";
     this.start_epoch = "";
     this.type = "";
     this.url = "";
