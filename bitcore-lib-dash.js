@@ -3531,7 +3531,7 @@ inherits(Proposal,GovObject);
 Proposal.prototype.dataHex = function() {
     var _govObj = {
         end_epoch: this.end_epoch,
-        name: this._toASCII(this.name),
+        name: this.name,
         payment_address: this.payment_address,
         payment_amount: this.payment_amount,
         start_epoch: this.start_epoch,
@@ -3539,7 +3539,12 @@ Proposal.prototype.dataHex = function() {
         url: this.url
     };
 
-    return '[["'+this._govOp+'", '+JSON.stringify(_govObj)+']]';
+
+    // screwy data shims 'til we can fix this on dashd
+    var inner = [this._govOp, _govObj];
+    var outer = [ inner ];
+
+    return JSON.stringify(outer);
 };
 
 Proposal.prototype._newGovObject = function() {
