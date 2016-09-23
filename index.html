@@ -91,7 +91,7 @@
         ProposalGenerator.prototype.walletCommands = function() {
             var gov = this.gov;
 
-            var propCommand = "gobject submit "+$('#parentHash').val() + " " + $('#revision').val() +"  " + $('#time').val() +" " + gov.uncheckedSerialize();
+            var propCommand = "gobject prepare "+$('#parentHash').val() + " " + $('#revision').val() +"  " + $('#time').val() +" " + gov.uncheckedSerialize();
             $("textarea#prepareProposal").val(propCommand);
 
             if(this._mode == 'proposal') {
