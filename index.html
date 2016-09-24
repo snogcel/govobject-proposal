@@ -58,6 +58,10 @@
                         proposal.createProposal();
 
                     });
+
+                    $('#btnNew').click(function() {
+                        proposal.resetProposal();
+                    });
                 }
             });
         });
@@ -91,12 +95,12 @@
         ProposalGenerator.prototype.walletCommands = function() {
             var gov = this.gov;
 
+
             var propCommand = "gobject submit "+$('#parentHash').val() + " " + $('#revision').val() +"  " + $('#time').val() +" " + gov.uncheckedSerialize();
             $("textarea#prepareProposal").val(propCommand);
 
             if(this._mode == 'proposal') {
-                $('.createProposal#createProposalHeader').addClass('hidden');
-                $('.createProposal#createProposalForm').addClass('hidden');
+                setFormEditable(true);
 
                 $('.walletCommands#walletCommandsHeader').removeClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').removeClass('hidden');
@@ -112,8 +116,7 @@
             $('#submitProposal').val("");
 
             if(this._mode == 'command') {
-                $('.createProposal#createProposalHeader').removeClass('hidden');
-                $('.createProposal#createProposalForm').removeClass('hidden');
+                setFormEditable(false);
 
                 $('.walletCommands#walletCommandsHeader').addClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').addClass('hidden');
@@ -123,6 +126,35 @@
                 this._mode = 'proposal';
             }
         };
+
+        ProposalGenerator.prototype.resetProposal = function() {
+            $('#name').val('');
+            $('#url').val('');
+            $('#start_epoch').val('');
+            $('#end_epoch').val('');
+            $('#payment_address').val('');
+            $('#payment_amount').val('');
+            setFormEditable(true);
+        }
+
+        function setFormEditable(edit) {
+            $('#name').attr("disabled", edit);
+            $('#url').attr("disabled", edit);
+            $('#start_epoch').attr("disabled", edit);
+            $('#end_epoch').attr("disabled", edit);
+            $('#payment_address').attr("disabled", edit);
+            $('#payment_amount').attr("disabled", edit);
+
+            if (edit === true) {
+                $('#btnPrepare').addClass('hidden');
+                $('#btnEdit').removeClass('hidden');
+                $('#btnNew').removeClass('hidden');
+            } else {
+                $('#btnPrepare').removeClass('hidden');
+                $('#btnEdit').addClass('hidden');
+                $('#btnNew').addClass('hidden');
+            }
+        }
 
         var copyToClipboard = function(id) {
             document.getElementById(id).select();
@@ -185,6 +217,8 @@
             </div>
 
             <div type="submit" class="btn btn-primary" id="btnPrepare">Create Proposal</div>
+            <div type="submit" class="btn btn-primary hidden" id="btnEdit">Edit Proposal</div>
+            <div type="submit" class="btn btn-primary hidden" id="btnNew">New Proposal</div>
 
             <div class="form-group" style="display:none;">
                 <label for="type">type:</label>
@@ -230,11 +264,6 @@
     </div>
 
     <div class="row walletCommands hidden" id="walletCommandsHeader">
-
-        <div class="col-xs-12">
-            <div type="submit" class="btn btn-primary" id="btnEdit">Edit Proposal</div>
-        </div>
-
         <div class="col-xs-12">
             <h2>Wallet Commands</h2>
         </div>
