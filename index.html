@@ -31,6 +31,10 @@
                 copyToClipboard($(this).attr('id'));
             });
 
+            $('.createProposal input').focus(function() {
+                $(this).removeClass('validationError');
+            });
+
             $('#btnPrepare').click(function() {
 
                 var proposal = new ProposalGenerator(gov);
@@ -43,7 +47,7 @@
 
                     $('#feeTxid').on('input', function() {
                         if ($(this).val().length > 0) {
-                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.uncheckedSerialize() + " " + $(this).val();
+                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
 
                             $('textarea#submitProposal').val(submitCommand);
                             $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
@@ -69,6 +73,7 @@
         var ProposalGenerator = function(gov) {
             this._mode = 'proposal';
             this.gov = gov;
+            this.gov.network = 'testnet';
 
             // proposal basic fields
             this.gov.name = $('#name').val();
@@ -85,18 +90,62 @@
         };
 
         ProposalGenerator.prototype.validate = function() {
-            var gov = this.gov;
+            try {
+                var gov = this.gov.serialize();
+            }
+            catch (e) {
 
-            // TODO: perform validation within bitcore-lib-dash
-            // return gov.getSerializationError();
+                switch(e.message) {
+                    case 'Invalid Timespan':
+                        console.log("Error: invalid timespan");
+                        $('#start_epoch, #end_epoch').addClass('validationError');
+                        break;
+
+                    case 'Invalid Start Date':
+                        console.log("Error: invalid start date");
+                        $('#start_epoch').addClass('validationError');
+                        break;
+
+                    case 'Invalid End Date':
+                        console.log("Error: invalid end date");
+                        $('#end_epoch').addClass('validationError');
+                        break;
+
+                    case 'Invalid Address':
+                        console.log("Error: invalid address");
+                        $('#payment_address').addClass('validationError');
+                        break;
+
+                    case 'Invalid Payment Amount':
+                        console.log("Error: invalid payment amount");
+                        $('#payment_amount').addClass('validationError');
+                        break;
+
+                    case 'Invalid URL':
+                        console.log("Error: invalid url");
+                        $('#url').addClass('validationError');
+                        break;
+
+                    case 'Invalid Name':
+                        console.log("error: invalid name");
+                        $('#name').addClass('validationError');
+                        break;
+
+                    default:
+                        console.log(e);
+                        break;
+                }
+
+                return false;
+            }
+
             return true;
         };
 
         ProposalGenerator.prototype.walletCommands = function() {
             var gov = this.gov;
 
-
-            var propCommand = "gobject prepare "+$('#parentHash').val() + " " + $('#revision').val() +"  " + $('#time').val() +" " + gov.uncheckedSerialize();
+            var propCommand = "gobject prepare "+$('#parentHash').val() + " " + $('#revision').val() +"  " + $('#time').val() +" " + gov.serialize();
             $("textarea#prepareProposal").val(propCommand);
 
             if(this._mode == 'proposal') {
@@ -176,6 +225,8 @@
         #walletCommandsPrepare { margin-top:2em; }
         #walletCommandsTx { margin-top:2em; }
         #walletCommandsSubmit { margin-top:2em; }
+
+        .validationError { background-color:#ffe6e6; }
 
     </style>
 

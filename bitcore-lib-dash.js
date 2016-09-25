@@ -3208,6 +3208,32 @@ module.exports = [{
     'message': 'Invalid exchange rate: {0}'
   }]
 }, {
+  name: 'GovObject',
+  message: 'Internal Error on GovObject {0}',
+  errors: [{
+    name: 'Proposal',
+    message: 'Internal Error on Proposal {0}',
+    errors: [{
+      name: 'invalidDate',
+      message: 'Invalid Date'
+    }, {
+      name: 'invalidDateWindow',
+      message: 'Invalid Timespan'
+    }, {
+      name: 'invalidAddress',
+      message: 'Invalid Address'
+    }, {
+      name: 'invalidPayment',
+      message: 'Invalid Payment Amount'
+    }, {
+      name: 'invalidUrl',
+      message: 'Invalid URL'
+    }, {
+      name: 'invalidName',
+      message: 'Invalid Name'
+    }]
+  }]
+}, {
   name: 'Transaction',
   message: 'Internal Error on Transaction {0}',
   errors: [{
@@ -3354,6 +3380,8 @@ var JSUtil = require('../util/js');
 var BufferReader = require('../encoding/bufferreader');
 var BufferWriter = require('../encoding/bufferwriter');
 
+var Address = require('../address');
+
 /**
  * Represents a generic Governance Object
  *
@@ -3422,7 +3450,6 @@ GovObject.prototype.fromString = function(string) {
 
 /**
  * Retrieve a hexa string that can be used with dashd's CLI interface
- * (decoderawtransaction, sendrawtransaction)
  *
  * @param {Object} opts allows to skip certain tests. {@see Transaction#serialize}
  * @return {string}
@@ -3430,7 +3457,6 @@ GovObject.prototype.fromString = function(string) {
 GovObject.prototype.checkedSerialize = function(opts) {
     var serializationError = this.getSerializationError(opts);
     if (serializationError) {
-        serializationError.message += ' Use uncheckedSerialize if you wish to skip security checks.';
         throw serializationError;
     }
     return this.uncheckedSerialize();
@@ -3458,7 +3484,6 @@ GovObject.prototype.toBuffer = function() {
 };
 
 GovObject.prototype.toBufferWriter = function(writer) {
-    console.log(this.dataHex());
     writer.write(new Buffer(this.dataHex()));
     return writer;
 };
@@ -3479,33 +3504,38 @@ GovObject.shallowCopy = function(GovObject) {
     return copy;
 };
 
-GovObject.prototype._toASCII = function(string) {
-    var escapable = /[\\\"\x00-\x1f\x7f-\uffff]/g,
-        meta = {    // table of character substitutions
-            '\b': '\\b',
-            '\t': '\\t',
-            '\n': '\\n',
-            '\f': '\\f',
-            '\r': '\\r',
-            '"' : '\\"',
-            '\\': '\\\\'
-        };
+GovObject.prototype._verifyDateFormat = function(date) {
+    var parsedDate = new Date(date * 1000);
+    return parsedDate;
+};
 
-    escapable.lastIndex = 0;
-    return escapable.test(string) ?
-    '"' + string.replace(escapable, function (a) {
-        var c = meta[a];
-        return typeof c === 'string' ? c :
-        '\\u' + ('0000' + a.charCodeAt(0).toString(16)).slice(-4);
-    }) + '"' :
-    '"' + string + '"';
+GovObject.prototype._verifyPayment = function(payment) {
+    var parsedPayment = parseFloat(payment);
+    if(isNaN(parsedPayment)) return true;
+
+    return Boolean((parsedPayment <= 0));
+};
+
+GovObject.prototype._verifyAddress = function(address, network) {
+    var validAddress = Address.isValid(address, network);
+    return validAddress;
+};
+
+GovObject.prototype._verifyUrl = function(url) {
+    var urlregex = /^(https?|ftp):\/\/([a-zA-Z0-9.-]+(:[a-zA-Z0-9.&%$-]+)*@)*((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])){3}|([a-zA-Z0-9-]+\.)*[a-zA-Z0-9-]+\.(com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2}))(:[0-9]+)*(\/($|[a-zA-Z0-9.,?'\\+&%$#=~_-]+))*$/;
+    return urlregex.test(url);
+};
+
+GovObject.prototype._verifyName = function(name) {
+    var nameregex = /^[-_a-zA-Z0-9]+$/;
+    return nameregex.test(name);
 };
 
 
 module.exports = GovObject;
 
 }).call(this,require("buffer").Buffer)
-},{"../encoding/bufferreader":14,"../encoding/bufferwriter":15,"../errors":17,"../util/buffer":46,"../util/js":47,"../util/preconditions":48,"buffer":115,"buffer-compare":113,"lodash":187}],20:[function(require,module,exports){
+},{"../address":1,"../encoding/bufferreader":14,"../encoding/bufferwriter":15,"../errors":17,"../util/buffer":46,"../util/js":47,"../util/preconditions":48,"buffer":115,"buffer-compare":113,"lodash":187}],20:[function(require,module,exports){
 module.exports = require('./govobject');
 
 module.exports.Proposal = require('./types/proposal');
@@ -3514,6 +3544,7 @@ module.exports.Proposal = require('./types/proposal');
 'use strict';
 
 var GovObject = require('../govobject');
+var errors = require('../../errors');
 var inherits = require('util').inherits;
 
 /**
@@ -3548,6 +3579,8 @@ Proposal.prototype.dataHex = function() {
 };
 
 Proposal.prototype._newGovObject = function() {
+    this.network = "livenet";
+
     this.end_epoch = "";
     this.name = "";
     this.payment_address = "";
@@ -3564,15 +3597,52 @@ Proposal.prototype.fromObject = function fromObject(arg) {
 };
 
 GovObject.prototype.getSerializationError = function(opts) {
+    opts = opts || {};
 
-    // TODO
+    // check date format
+    if(isNaN(this._verifyDateFormat(this.start_epoch))) {
+        return new errors.GovObject.Proposal.invalidDate();
+    }
+
+    if(isNaN(this._verifyDateFormat(this.end_epoch))) {
+        return new errors.GovObject.Proposal.invalidDate();
+    }
+
+    if (this.start_epoch >= this.end_epoch) {
+        return new errors.GovObject.Proposal.invalidDateWindow();
+    }
+
+    var now = Math.round(new Date().getTime()/1000);
+    if (this.end_epoch < now) {
+        return new errors.GovObject.Proposal.invalidDateWindow();
+    }
+
+    // check address
+    if (!this._verifyAddress(this.payment_address,this.network)) {
+        return new errors.GovObject.Proposal.invalidAddress();
+    }
+
+    // check payment amount
+    if (this._verifyPayment(this.payment_amount)) {
+        return new errors.GovObject.Proposal.invalidPayment();
+    }
+
+    // check url
+    if(!this._verifyUrl(this.url)) {
+        return new errors.GovObject.Proposal.invalidUrl();
+    }
+
+    // check name
+    if(!this._verifyName(this.name)) {
+        return new errors.GovObject.Proposal.invalidName();
+    }
 
 };
 
 
 module.exports = Proposal;
 
-},{"../govobject":19,"util":241}],22:[function(require,module,exports){
+},{"../../errors":17,"../govobject":19,"util":241}],22:[function(require,module,exports){
 'use strict';
 
 module.exports = {
