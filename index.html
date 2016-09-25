@@ -177,22 +177,16 @@
         };
 
         ProposalGenerator.prototype.resetProposal = function() {
-            $('#name').val('');
-            $('#url').val('');
-            $('#start_epoch').val('');
-            $('#end_epoch').val('');
-            $('#payment_address').val('');
-            $('#payment_amount').val('');
+            $('.createProposal input').each(function() {
+               $(this).val('');
+            });
             setFormEditable(true);
-        }
+        };
 
         function setFormEditable(edit) {
-            $('#name').attr("disabled", edit);
-            $('#url').attr("disabled", edit);
-            $('#start_epoch').attr("disabled", edit);
-            $('#end_epoch').attr("disabled", edit);
-            $('#payment_address').attr("disabled", edit);
-            $('#payment_amount').attr("disabled", edit);
+            $('.createProposal input').each(function() {
+                $(this).attr("disabled", edit);
+            });
 
             if (edit === true) {
                 $('#btnPrepare').addClass('hidden');
