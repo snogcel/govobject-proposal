@@ -10,18 +10,122 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="bitcore-lib-dash.js"></script>
-
+    <script src="http://127.0.0.1:3001/socket.io/socket.io.js"></script>
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
+
+        eventToListenTo = 'block';
+        room = 'inv';
+
+        var socket = io("http://127.0.0.1:3001/");
+        socket.on('connect', function() {
+            // Join the room.
+            socket.emit('subscribe', room);
+            console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
+        });
+        socket.on(eventToListenTo, function(data) {
+            if (data.txlock) {
+                console.log("New InstantSend transaction received: " + data.txid)
+            } else {
+                console.log("New block received: " + data + " time: " + data.time)
+            }
+        });
+
         var gov = new Bitcore.GovObject.Proposal();
 
         $(document).ready(function() {
 
-            var opts = { dateFormat: $.datepicker.ISO_8601 };
 
-            $('#start_epoch').datepicker(opts, 'getdate');
-            $('#end_epoch').datepicker(opts, 'getdate');
+            $.getJSON( "http://127.0.0.1:3001/insight-api-dash/status?q=getinfo", function( data ) {
+                var blockheight = data.info.blocks;
+                console.log('network: ' + gov.network);
+                var budgetPaymentCycleBlocks;
+                // Amount of blocks in a months period of time (using 2.6 minutes per) = (60*24*30)/2.6
+                if (gov.network == 'livenet') {
+                    budgetPaymentCycleBlocks = 16616;
+                    }
+                else {
+                    //for testing purposes
+                    budgetPaymentCycleBlocks  = 50; //ten times per day
+                }
+
+                var nextsuperblock = Math.round(blockheight/budgetPaymentCycleBlocks) * budgetPaymentCycleBlocks;
+                var selectblock = nextsuperblock;
+
+                console.log('blockheight: ' + blockheight);
+                console.log('next superblock ' + nextsuperblock);
+
+                var optionsStart = [];
+                var optionsEnd = [];
+                var numOfSuperBlockDates = 12;
+
+                // Clear the options first
+                var start_epoch = $("#start_epoch");
+                var end_epoch = $("#end_epoch");
+                start_epoch.find("option").each(function(index, option) {
+                    $(option).remove();
+                });
+                end_epoch.find("option").each(function(index, option) {
+                    $(option).remove();
+                });
+
+                var blocksleft = nextsuperblock - blockheight;
+                for (i = 0; i < numOfSuperBlockDates; i ++)
+                {
+                    var timeleft;
+                    var blockdiff = nextsuperblock - blockheight;
+                    var nextsuperblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
+                    var d = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
+
+                    if (i == 0) {
+                        var daysleft = Math.round( blocksleft/554 * 10) / 10; // day rounded to one decimal
+                        if (daysleft >= 2) {
+                            timeleft = daysleft + ' days'
+                        }
+                        else {
+                                timeleft = daysleft + ' day'
+                        }
+                        optionsStart.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                    }
+                    else {
+                        if (i == 1) {
+                            timeleft = '1 month';
+                        }
+                        else {
+                            timeleft = i + ' months';
+                        }
+                        optionsStart.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                        optionsEnd.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                        if (i == numOfSuperBlockDates - 1) {
+                            timeleft = numOfSuperBlockDates + ' month';
+                            nextsuperblock += budgetPaymentCycleBlocks;
+                            optionsEnd.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                        }
+                    }
+                    nextsuperblock += budgetPaymentCycleBlocks;
+                }
+
+                start_epoch.append(optionsStart.join(""));
+                end_epoch.append(optionsEnd.join(""));
+
+                console.log('blocks left to next superblock: ' + (selectblock - blockheight));
+                console.log('selectblock: ' + selectblock);
+                console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
+                //if next superblock is less than 3 days (60*24*3/2.6) away, select next month
+                if (selectblock - blockheight < 1661) {
+                    selectblock += budgetPaymentCycleBlocks;
+                    blockdiff = selectblock - blockheight;
+                    nextsuperblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
+                    var selectstartdate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
+                    console.log('new selectblock: ' + selectblock);
+                    start_epoch.val(selectstartdate);
+                    nextsuperblocktimestamp = nextsuperblocktimestamp + 16616 * (2.6 * 60 * 1000);
+                    var selectenddate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
+                    end_epoch.val(selectenddate);
+                }
+            });
+
 
             $('#prepareProposal').click(function() {
                 copyToClipboard($(this).attr('id'));
@@ -82,7 +186,7 @@
             this.gov.payment_amount = parseFloat($('#payment_amount').val());
 
             // format dates for gobject serialization
-            this.gov.start_epoch = (new Date($('#start_epoch').val()) / 1000) || null;
+           // this.gov.start_epoch = (new Date($('#start_epoch').val()) / 1000) || null;
             this.gov.end_epoch = (new Date($('#end_epoch').val()) / 1000) || null;
 
             // hidden elements
@@ -204,6 +308,7 @@
             document.execCommand('copy');
         };
 
+
     </script>
 
     <style type="text/css">
@@ -258,7 +363,7 @@
 
             <div class="form-group">
                 <label for="start_epoch">Proposal Start Date:</label>
-                <input type="text" class="form-control" id="start_epoch" value="" placeholder="">
+                <select name="start_epoch" class="form-control" id="start_epoch"></select>
             </div>
 
             <div type="submit" class="btn btn-primary" id="btnPrepare">Create Proposal</div>
@@ -301,7 +406,7 @@
 
             <div class="form-group">
                 <label for="end_epoch">Proposal End Date:</label>
-                <input type="text" class="form-control" id="end_epoch" value="" placeholder="">
+                <select name="end_epoch" class="form-control" id="end_epoch"></select>
             </div>
 
         </div>
