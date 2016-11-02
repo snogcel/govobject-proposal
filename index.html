@@ -112,7 +112,8 @@
                 console.log('blocks left to next superblock: ' + (selectblock - blockheight));
                 console.log('selectblock: ' + selectblock);
                 console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
-                //if next superblock is less than 3 days (60*24*3/2.6) away, select next month
+
+                //if next superblock is less than 3 days (60*24*3/2.6) away, select next month's superblock by default so proposal has more time to be voted upon
                 if (selectblock - blockheight < 1661) {
                     selectblock += budgetPaymentCycleBlocks;
                     blockdiff = selectblock - blockheight;
@@ -124,6 +125,16 @@
                     var selectenddate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
                     end_epoch.val(selectenddate);
                 }
+            });
+
+            //change end date to one month after start date by default
+            $('#start_epoch').change(function() {
+                console.log('start_epoch changed');
+                var start_time = $('#start_epoch').val();
+                console.log('start_epoch: ' + start_time);
+                var startindex = $('#start_epoch').find(":selected").index();
+                var endindex = startindex + 1;
+                $('#end_epoch :nth-child(' + endindex + ')').prop('selected', true);
             });
 
 
@@ -177,7 +188,7 @@
         var ProposalGenerator = function(gov) {
             this._mode = 'proposal';
             this.gov = gov;
-            this.gov.network = 'testnet';
+            this.gov.network = 'livenet';
 
             // proposal basic fields
             this.gov.name = $('#name').val();
@@ -186,7 +197,7 @@
             this.gov.payment_amount = parseFloat($('#payment_amount').val());
 
             // format dates for gobject serialization
-           // this.gov.start_epoch = (new Date($('#start_epoch').val()) / 1000) || null;
+            this.gov.start_epoch = (new Date($('#start_epoch').val()) / 1000) || null;
             this.gov.end_epoch = (new Date($('#end_epoch').val()) / 1000) || null;
 
             // hidden elements
