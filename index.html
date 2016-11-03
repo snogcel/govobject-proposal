@@ -300,6 +300,9 @@
             $('.createProposal input').each(function() {
                 $(this).attr("disabled", edit);
             });
+            $('.createProposal select').each(function() {
+                $(this).attr("disabled", edit);
+            });
 
             if (edit === true) {
                 $('#btnPrepare').addClass('hidden');
