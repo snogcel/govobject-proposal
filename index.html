@@ -14,7 +14,8 @@
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
-
+        //number of days to have as buffer for proposal start date before jumping to next month
+        var bufferdays = 3;
         eventToListenTo = 'block';
         room = 'inv';
 
@@ -109,19 +110,18 @@
                 start_epoch.append(optionsStart.join(""));
                 end_epoch.append(optionsEnd.join(""));
 
-                console.log('blocks left to next superblock: ' + (selectblock - blockheight));
-                console.log('selectblock: ' + selectblock);
-                console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
+                //console.log('blocks left to next superblock: ' + (selectblock - blockheight));
+                //console.log('selectblock: ' + selectblock);
+                //console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
 
                 //if next superblock is less than 3 days (60*24*3/2.6) away, select next month's superblock by default so proposal has more time to be voted upon
-                if (selectblock - blockheight < 1661) {
+                if (selectblock - blockheight < (60*24*bufferdays/2.6)) {
                     selectblock += budgetPaymentCycleBlocks;
                     blockdiff = selectblock - blockheight;
                     nextsuperblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
                     var selectstartdate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
-                    console.log('new selectblock: ' + selectblock);
                     start_epoch.val(selectstartdate);
-                    nextsuperblocktimestamp = nextsuperblocktimestamp + 16616 * (2.6 * 60 * 1000);
+                    nextsuperblocktimestamp = nextsuperblocktimestamp + budgetPaymentCycleBlocks * (2.6 * 60 * 1000);
                     var selectenddate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
                     end_epoch.val(selectenddate);
                 }
@@ -129,9 +129,7 @@
 
             //change end date to one month after start date by default
             $('#start_epoch').change(function() {
-                console.log('start_epoch changed');
                 var start_time = $('#start_epoch').val();
-                console.log('start_epoch: ' + start_time);
                 var startindex = $('#start_epoch').find(":selected").index();
                 var endindex = startindex + 1;
                 $('#end_epoch :nth-child(' + endindex + ')').prop('selected', true);
