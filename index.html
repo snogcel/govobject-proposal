@@ -16,6 +16,7 @@
         var Bitcore = require('bitcore-lib-dash');
         //number of days to have as buffer for proposal start date before jumping to next month
         var bufferdays = 3;
+        var blockheight;
         eventToListenTo = 'block';
         room = 'inv';
 
@@ -39,21 +40,13 @@
 
 
             $.getJSON( "http://195.141.143.55:3001/insight-api-dash/status?q=getinfo", function( data ) {
-                var blockheight = data.info.blocks;
+                blockheight = data.info.blocks;
                 console.log('network: ' + gov.network);
-                var budgetPaymentCycleBlocks;
-                // Amount of blocks in a months period of time (using 2.6 minutes per) = (60*24*30)/2.6
-                if (gov.network == 'livenet') {
-                    budgetPaymentCycleBlocks = 16616;
-                    }
-                else {
-                    //for testing purposes
-                    budgetPaymentCycleBlocks  = 50; //ten times per day
-                }
-
+                var budgetPaymentCycleBlocks = getBudgetPaymentCycleBlocks();
                 var nextsuperblock = Math.round(blockheight/budgetPaymentCycleBlocks) * budgetPaymentCycleBlocks;
                 var selectblock = nextsuperblock;
 
+                console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
                 console.log('blockheight: ' + blockheight);
                 console.log('next superblock ' + nextsuperblock);
 
@@ -87,7 +80,7 @@
                         else {
                                 timeleft = daysleft + ' day'
                         }
-                        optionsStart.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                        optionsStart.push("<option value='" + nextsuperblock + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
                     }
                     else {
                         if (i == 1) {
@@ -96,23 +89,30 @@
                         else {
                             timeleft = i + ' months';
                         }
-                        optionsStart.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
-                        optionsEnd.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                        optionsStart.push("<option value='" + nextsuperblock + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
                         if (i == numOfSuperBlockDates - 1) {
                             timeleft = numOfSuperBlockDates + ' month';
                             nextsuperblock += budgetPaymentCycleBlocks;
-                            optionsEnd.push("<option value='" + d + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
                         }
                     }
                     nextsuperblock += budgetPaymentCycleBlocks;
                 }
 
                 start_epoch.append(optionsStart.join(""));
-                end_epoch.append(optionsEnd.join(""));
 
-                //console.log('blocks left to next superblock: ' + (selectblock - blockheight));
-                //console.log('selectblock: ' + selectblock);
-                //console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
+                //populate budget cycle dropdown
+                for (i = 1; i < 100; i ++)
+                {
+                    if (i == 1) {
+                        optionsEnd.push("<option value='" + i + "'>one-time payment</option>");
+                    }
+                    else {
+                        optionsEnd.push("<option value='" + i + "'>payment once a month for " + i + " months</option>");
+                    }
+
+                }
+
+                end_epoch.append(optionsEnd.join(""));
 
                 //if next superblock is less than 3 days (60*24*3/2.6) away, select next month's superblock by default so proposal has more time to be voted upon
                 if (selectblock - blockheight < (60*24*bufferdays/2.6)) {
@@ -123,18 +123,8 @@
                     start_epoch.val(selectstartdate);
                     nextsuperblocktimestamp = nextsuperblocktimestamp + budgetPaymentCycleBlocks * (2.6 * 60 * 1000);
                     var selectenddate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
-                    end_epoch.val(selectenddate);
                 }
             });
-
-            //change end date to one month after start date by default
-            $('#start_epoch').change(function() {
-                var start_time = $('#start_epoch').val();
-                var startindex = $('#start_epoch').find(":selected").index();
-                var endindex = startindex + 1;
-                $('#end_epoch :nth-child(' + endindex + ')').prop('selected', true);
-            });
-
 
             $('#prepareProposal').click(function() {
                 copyToClipboard($(this).attr('id'));
@@ -195,8 +185,12 @@
             this.gov.payment_amount = parseFloat($('#payment_amount').val());
 
             // format dates for gobject serialization
-            this.gov.start_epoch = (new Date($('#start_epoch').val()) / 1000) || null;
-            this.gov.end_epoch = (new Date($('#end_epoch').val()) / 1000) || null;
+            var startdate = formattedDateForSuperblockHeight($('#start_epoch').val());
+            console.log('startdate: ' + startdate);
+            this.gov.start_epoch = (new Date(startdate)) || null;
+            var enddate = formattedDateForSuperblockHeight($('#start_epoch').val(),$('#end_epoch').val());
+            console.log('enddate: ' + enddate);
+            this.gov.end_epoch = (new Date(enddate)) || null;
 
             // hidden elements
             this.gov.type = parseInt($('#type').val());
@@ -320,6 +314,32 @@
             document.execCommand('copy');
         };
 
+        getBudgetPaymentCycleBlocks = function() {
+            // Amount of blocks in a months period of time (using 2.6 minutes per) = (60*24*30)/2.6
+            if (gov.network == 'livenet') {
+                return 16616;
+            }
+            else {
+                //for testing purposes
+                return 50; //ten times per day
+            }
+        };
+
+        formattedDateForSuperblockHeight = function(startheight, months) {
+            months = months || 0;
+            var endheight;
+            var blockdiff;
+            if (months !== 0) {
+                endheight = (parseInt(startheight) + (getBudgetPaymentCycleBlocks()*months));
+                blockdiff = endheight - blockheight;
+            }
+            else {
+                blockdiff = startheight - blockheight;
+            }
+            var superblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
+            var formattedDate = $.datepicker.formatDate('yy-mm-dd', new Date(superblocktimestamp));
+            return formattedDate;
+        };
 
     </script>
 
@@ -417,7 +437,7 @@
             </div>
 
             <div class="form-group">
-                <label for="end_epoch">Proposal End Date:</label>
+                <label for="end_epoch">Choose payment cycle:</label>
                 <select name="end_epoch" class="form-control" id="end_epoch"></select>
             </div>
 
