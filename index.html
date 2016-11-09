@@ -39,7 +39,7 @@
         $(document).ready(function() {
 
 
-            $.getJSON( "http://195.141.143.55:3001/insight-api-dash/status?q=getinfo", function( data ) {
+            $.getJSON("http://195.141.143.55:3001/insight-api-dash/status?q=getinfo", function( data ) {
                 blockheight = data.info.blocks;
                 console.log('network: ' + gov.network);
                 var budgetPaymentCycleBlocks = getBudgetPaymentCycleBlocks();
@@ -117,12 +117,8 @@
                 //if next superblock is less than 3 days (60*24*3/2.6) away, select next month's superblock by default so proposal has more time to be voted upon
                 if (selectblock - blockheight < (60*24*bufferdays/2.6)) {
                     selectblock += budgetPaymentCycleBlocks;
-                    blockdiff = selectblock - blockheight;
-                    nextsuperblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
-                    var selectstartdate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
-                    start_epoch.val(selectstartdate);
+                    start_epoch.val(selectblock);
                     nextsuperblocktimestamp = nextsuperblocktimestamp + budgetPaymentCycleBlocks * (2.6 * 60 * 1000);
-                    var selectenddate = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
                 }
             });
 
