@@ -40,6 +40,8 @@
 
 
             $.getJSON("http://195.141.143.55:3001/insight-api-dash/status?q=getinfo", function( data ) {
+                $("#time").val(Math.floor((new Date).getTime() / 1000));
+                console.log('time: ' + $("#time").val());
                 blockheight = data.info.blocks;
                 console.log('network: ' + gov.network);
                 var budgetPaymentCycleBlocks = getBudgetPaymentCycleBlocks();
