@@ -14,34 +14,19 @@
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
+        var apiserversocket = 'http://195.141.143.55:3001/';
         //number of days to have as buffer for proposal start date before jumping to next month
         var bufferdays = 3;
         var blockheight;
-        eventToListenTo = 'block';
-        room = 'inv';
-
-        var socket = io("http://195.141.143.55:3001/");
-        socket.on('connect', function() {
-            // Join the room.
-            socket.emit('subscribe', room);
-            console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
-        });
-        socket.on(eventToListenTo, function(data) {
-            if (data.txlock) {
-                console.log("New InstantSend transaction received: " + data.txid)
-            } else {
-                console.log("New block received: " + data + " time: " + data.time)
-            }
-        });
-
         var gov = new Bitcore.GovObject.Proposal();
 
         $(document).ready(function() {
 
 
-            $.getJSON("http://195.141.143.55:3001/insight-api-dash/status?q=getinfo", function( data ) {
-                $("#time").val(Math.floor((new Date).getTime() / 1000));
-                console.log('time: ' + $("#time").val());
+            $.getJSON(apiserversocket + "insight-api-dash/status?q=getinfo", function( data ) {
+                var timefield = $("#time");
+                timefield.val(Math.floor((new Date).getTime() / 1000));
+                console.log('time: ' + timefield.val());
                 blockheight = data.info.blocks;
                 console.log('network: ' + gov.network);
                 var budgetPaymentCycleBlocks = getBudgetPaymentCycleBlocks();
@@ -148,10 +133,102 @@
 
                     $('#feeTxid').on('input', function() {
                         if ($(this).val().length > 0) {
-                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
+                            var txidfield = $('#feeTxid');
+                            console.log('value entered: ' + txidfield.val());
 
+                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
                             $('textarea#submitProposal').val(submitCommand);
-                            $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+
+                            txidfield.change(function() {
+                                // Check input( $( this ).val() ) for validity here
+                                console.log('there is something wrong with your transaction ID: ' + $('#feeTxid').val()) + ' Please copy and paste it here .';
+                                txidfield.val('')
+                            });
+
+                            //some checks if feeTxid seems valid before we check the api
+                            if (txidfield.val().length == 64) {
+                                if (isAlphaNumeric(txidfield.val())) {
+                                    txidfield.unbind( "change" );
+                                    console.log('feeTxid seems good: ' + txidfield.val());
+                                    //$("#feeTxid").attr("disabled", true);
+                                    console.log("wait while we check the api!");
+
+                                    // first check if transactionid is already in api
+                                    $.getJSON(apiserversocket + 'insight-api-dash/tx/' + txidfield.val(), function(data) {
+                                        var confirmations = data.confirmations;
+                                        console.log('Transaction has ' + confirmations + ' confirmation(s)');
+                                        if (confirmations != 'undefined' && $.isNumeric(confirmations)) {
+                                            var socket = io(apiserversocket);
+                                            if (confirmations == 0) {
+                                                // we have to count the blocks and wait for 6 confirmations
+                                                alert("we have to count the blocks and wait for 6 confirmations");
+                                                eventToListenTo = 'block';
+                                                room = 'inv';
+                                                socket.on('connect', function() {
+                                                    // Join the room.
+                                                    socket.emit('subscribe', room);
+                                                    console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
+                                                });
+                                                socket.on(eventToListenTo, function(data) {
+                                                    confirmations = confirmations + 1;
+                                                    console.log("New block received: " + data + " time: " + data.time);
+                                                    console.log(confirmations + " confirmation(s)");
+                                                    if (confirmations >= 6) {
+                                                        $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                                    }
+                                                });
+                                            }
+                                            else if (confirmations > 0 && confirmations <= 5) {
+                                                // we have to count the blocks and wait for outstanding confirmations
+                                                alert("we have to count the blocks and wait for outstanding confirmations");
+                                                eventToListenTo = 'block';
+                                                room = 'inv';
+                                                socket.on('connect', function() {
+                                                    // Join the room.
+                                                    socket.emit('subscribe', room);
+                                                    console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
+                                                });
+                                                socket.on(eventToListenTo, function(data) {
+                                                    confirmations = confirmations + 1;
+                                                    console.log("New block received: " + data + " time: " + data.time);
+                                                    console.log(confirmations + " confirmation(s)");
+                                                    if (confirmations >= 6) {
+                                                        $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                // already reached 6 or more confirmations, so we can proceed
+                                                alert("already reached 6 or more confirmations, so we can proceed");
+                                                $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                            }
+                                        }
+                                        else {
+                                            console.log('Something went terribly wrong. Faulty api data?');
+                                        }
+                                    }).fail(function(jqXHR) {
+                                        if (jqXHR.status == 400) {
+                                            // there seems to be a either a problem with your feeTxid because txid is not found in api
+                                            console.log('problem with feeTxid! Ask for new input!');
+                                            alert("Check again and please enter your correct TxID!");
+                                            $("#feeTxid").attr("disabled", false);
+                                        } else {
+                                            console.log('There seems to be a problem with the api connection');
+                                        }
+                                    });
+
+
+
+                                }
+                                else {
+                                    alert("there is something wrong with your transaction ID. It must be alphanumeric!")
+                                }
+
+                            }
+
+
+
+
                         } else {
                             $('textarea#submitProposal').val('');
                             $('.walletCommands#walletCommandsSubmit').addClass('hidden');
@@ -183,10 +260,11 @@
             this.gov.payment_amount = parseFloat($('#payment_amount').val());
 
             // format dates for gobject serialization
-            var startdate = formattedDateForSuperblockHeight($('#start_epoch').val());
+            var start_epoch = $('#start_epoch');
+            var startdate = formattedDateForSuperblockHeight(start_epoch.val());
             console.log('startdate: ' + startdate);
             this.gov.start_epoch = (new Date(startdate)) || null;
-            var enddate = formattedDateForSuperblockHeight($('#start_epoch').val(),$('#end_epoch').val());
+            var enddate = formattedDateForSuperblockHeight(start_epoch.val(),$('#end_epoch').val());
             console.log('enddate: ' + enddate);
             this.gov.end_epoch = (new Date(enddate)) || null;
 
@@ -259,7 +337,7 @@
                 $('.walletCommands#walletCommandsHeader').removeClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').removeClass('hidden');
                 $('.walletCommands#walletCommandsTx').removeClass('hidden');
-                $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                //$('.walletCommands#walletCommandsSubmit').removeClass('hidden');
 
                 this._mode = 'command';
             }
@@ -335,9 +413,22 @@
                 blockdiff = startheight - blockheight;
             }
             var superblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
-            var formattedDate = $.datepicker.formatDate('yy-mm-dd', new Date(superblocktimestamp));
-            return formattedDate;
+            return $.datepicker.formatDate('yy-mm-dd', new Date(superblocktimestamp));
         };
+
+        function isAlphaNumeric(str) {
+            var code, i, len;
+
+            for (i = 0, len = str.length; i < len; i++) {
+                code = str.charCodeAt(i);
+                if (!(code > 47 && code < 58) && // numeric (0-9)
+                        !(code > 64 && code < 91) && // upper alpha (A-Z)
+                        !(code > 96 && code < 123)) { // lower alpha (a-z)
+                    return false;
+                }
+            }
+            return true;
+        }
 
     </script>
 
