@@ -208,7 +208,7 @@
                                         }
                                     }).fail(function(jqXHR) {
                                         if (jqXHR.status == 400) {
-                                            // there seems to be a either a problem with your feeTxid because txid is not found in api
+                                            // there seems to be a problem with your feeTxid because txid is not found in api
                                             console.log('problem with feeTxid! Ask for new input!');
                                             alert("Check again and please enter your correct TxID!");
                                             $("#feeTxid").attr("disabled", false);
