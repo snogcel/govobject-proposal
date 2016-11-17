@@ -10,18 +10,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="bitcore-lib-dash.js"></script>
-    <script src="http://195.141.143.55:3001/socket.io/socket.io.js"></script>
+    <script src="https://dev-test.dash.org:3001/socket.io/socket.io.js"></script>
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
-        var apiserversocket = 'http://195.141.143.55:3001/';
+        var apiserversocket = 'https://dev-test.dash.org:3001/';
         //number of days to have as buffer for proposal start date before jumping to next month
         var bufferdays = 3;
         var blockheight;
         var gov = new Bitcore.GovObject.Proposal();
 
         $(document).ready(function() {
-
 
             $.getJSON(apiserversocket + "insight-api-dash/status?q=getinfo", function( data ) {
                 var timefield = $("#time");
@@ -141,7 +140,7 @@
 
                             txidfield.change(function() {
                                 // Check input( $( this ).val() ) for validity here
-                                console.log('there is something wrong with your transaction ID: ' + $('#feeTxid').val()) + ' Please copy and paste it here .';
+                                console.log('there is something wrong with your transaction ID: ' + $('#feeTxid').val() + ' Please copy and paste it here .');
                                 txidfield.val('')
                             });
 
@@ -155,13 +154,14 @@
                                     // first check if transactionid is already in api
                                     $.getJSON(apiserversocket + 'insight-api-dash/tx/' + txidfield.val(), function(data) {
                                         txidfield.attr("disabled", true);
+                                        var txid = data.tx;
                                         var confirmations = data.confirmations;
                                         console.log('Transaction has ' + confirmations + ' confirmation(s)');
                                         if (confirmations != 'undefined' && $.isNumeric(confirmations)) {
                                             var socket = io(apiserversocket);
                                             if (confirmations == 0) {
                                                 // we have to count the blocks and wait for 6 confirmations
-                                                alert("we have to count the blocks and wait for 6 confirmations");
+                                                console.log("we have to count the blocks and wait for 6 confirmations");
                                                 eventToListenTo = 'block';
                                                 room = 'inv';
                                                 socket.on('connect', function() {
@@ -170,9 +170,31 @@
                                                     console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
                                                 });
                                                 socket.on(eventToListenTo, function(data) {
-                                                    confirmations = confirmations + 1;
                                                     console.log("New block received: " + data + " time: " + data.time);
-                                                    console.log(confirmations + " confirmation(s)");
+                                                    var blockhash = data;
+                                                    // let's check if transaction is really in this block or not
+                                                    $.getJSON(apiserversocket + 'insight-api-dash/txs/?block=' + blockhash, function(data) {
+                                                        var txs = data.txs;
+                                                        var numOfTxs = txs.length;
+                                                        for (var i = 0; i < numOfTxs; i++) {
+                                                            console.log('txs' + i + ': ' + txs[i].txid);
+                                                            if (txs[i].txid == blockhash) {
+                                                                console.log('all good. Count up confirmations.');
+                                                                confirmations = confirmations + 1;
+                                                                console.log(confirmations + " confirmation(s)");
+                                                            }
+                                                            else {
+                                                                console.log('txid not in new block. Waiting for some more blocks.');
+                                                            }
+                                                        }
+                                                    }).fail(function(jqXHR) {
+                                                        if (jqXHR.status == 400) {
+                                                            // there seems to be a problem with your feeTxid because txid is not found in api
+                                                            console.log('block hash not found in api!');
+                                                        } else {
+                                                            console.log('There seems to be a problem with the api connection. Maybe endpoint resyncing?');
+                                                        }
+                                                    });
                                                     if (confirmations >= 6) {
                                                         $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                                     }
@@ -180,7 +202,7 @@
                                             }
                                             else if (confirmations > 0 && confirmations <= 5) {
                                                 // we have to count the blocks and wait for outstanding confirmations
-                                                alert("we have to count the blocks and wait for outstanding confirmations");
+                                                console.log("we have to count the blocks and wait for outstanding confirmations");
                                                 eventToListenTo = 'block';
                                                 room = 'inv';
                                                 socket.on('connect', function() {
@@ -189,9 +211,31 @@
                                                     console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
                                                 });
                                                 socket.on(eventToListenTo, function(data) {
-                                                    confirmations = confirmations + 1;
                                                     console.log("New block received: " + data + " time: " + data.time);
-                                                    console.log(confirmations + " confirmation(s)");
+                                                    var blockhash = data;
+                                                    // let's check if transaction is really in this block or not
+                                                    $.getJSON(apiserversocket + 'insight-api-dash/txs/?block=' + blockhash, function(data) {
+                                                        var txs = data.txs;
+                                                        var numOfTxs = txs.length;
+                                                        for (var i = 0; i < numOfTxs; i++) {
+                                                            console.log('txs' + i + ': ' + txs[i].txid);
+                                                            if (txs[i].txid == blockhash) {
+                                                                console.log('all good. Count up confirmations.');
+                                                                confirmations = confirmations + 1;
+                                                                console.log(confirmations + " confirmation(s)");
+                                                            }
+                                                            else {
+                                                                console.log('txid not in new block. Waiting for some more blocks...');
+                                                            }
+                                                        }
+                                                    }).fail(function(jqXHR) {
+                                                        if (jqXHR.status == 400) {
+                                                            // there seems to be a problem with your feeTxid because txid is not found in api
+                                                            console.log('block hash not found in api!');
+                                                        } else {
+                                                            console.log('There seems to be a problem with the api connection. Maybe endpoint resyncing?');
+                                                        }
+                                                    });
                                                     if (confirmations >= 6) {
                                                         $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                                     }
@@ -431,6 +475,7 @@
             }
             return true;
         }
+
 
     </script>
 
