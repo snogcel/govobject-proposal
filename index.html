@@ -189,6 +189,7 @@
                                                         if (found) {
                                                             console.log('all good. Count up confirmations.');
                                                             confirmations = confirmations + 1;
+                                                            console.log('we have ' + confirmations + ' confirmations...');
                                                         }
                                                         else {
                                                             console.log('txid not in new block');
@@ -205,6 +206,7 @@
                                                 else {
                                                     // for the time being just count up the confirmations without confirming everytime if the transaction is still inside the previous blocks
                                                     confirmations = confirmations + 1;
+                                                    console.log('we have ' + confirmations + ' confirmations...');
                                                 }
 
                                                 if (confirmations >= 6) {
@@ -227,6 +229,7 @@
                                                 var blockhash = data;
                                                 // for the time being just count up the confirmations without confirming everytime if the transaction is still inside the previous blocks
                                                 confirmations = confirmations + 1;
+                                                console.log('we have ' + confirmations + ' confirmations...');
                                                 if (confirmations >= 6) {
                                                     $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                                 }
@@ -462,7 +465,7 @@
             }
             return true;
         };
-        
+
 
     </script>
 
