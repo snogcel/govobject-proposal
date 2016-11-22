@@ -461,64 +461,8 @@
                 }
             }
             return true;
-        }
-
-        function existsTransactionInBlock(blockhash, txid) {
-
-            $.getJSON(apiserversocket + 'insight-api-dash/txs/?block=' + blockhash, function(data) {
-                var txs = data.txs;
-                var found;
-                var numOfTxs = txs.length;
-                for (var i = 0; i < numOfTxs; i++) {
-                    console.log('txs' + i + ': ' + txs[i].txid);
-                    if (txs[i].txid === txid) {
-                        console.log('found tx!');
-                        found = true;
-                    }
-                }
-                if (found) {
-                    console.log('all good. ');
-                    return true;
-                }
-                else {
-                    console.log('txid not in new block');
-                    return false;
-                }
-
-            }).fail(function(jqXHR) {
-                if (jqXHR.status == 400) {
-                    // there seems to be a problem with your feeTxid because txid is not found in api
-                    console.log('block hash not found in api!');
-                    return false;
-                } else {
-                    console.log('There seems to be a problem with the api connection. Maybe endpoint resyncing?');
-                    return false;
-                }
-            });
-        }
-
-        function getConfirmationsForTxid(txid) {
-
-            var jqxhr = $.ajax({
-                url: apiserversocket + 'insight-api-dash/tx/' + txid,
-                async: 'false'
-            }).done(function() {
-                        alert( "success" );
-                    })
-                .fail(function(jqXHR) {
-                    if (jqXHR.status == 400) {
-                        // there seems to be a problem with your feeTxid because txid is not found in api
-                        console.log('block hash not found in api!');
-                        return false;
-                    } else {
-                        console.log('There seems to be a problem with the api connection. Maybe endpoint resyncing?');
-                        return false;
-                    }
-                })
-
-        }
-
-
+        };
+        
 
     </script>
 
