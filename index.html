@@ -18,10 +18,12 @@
         //number of days to have as buffer for proposal start date before jumping to next month
         var bufferdays = 3;
         var blockheight;
+        var progresstxt = "As of yet your transaction has 0 confirmations. We'll wait for 6 confirmations until you can submit your proposal. Waiting for new blocks to confirm...";
         var gov = new Bitcore.GovObject.Proposal();
 
         $(document).ready(function() {
 
+            $("#progresstxt").text(progresstxt);
             $.getJSON(apiserversocket + "insight-api-dash/status?q=getinfo", function( data ) {
                 var timefield = $("#time");
                 timefield.val(Math.floor((new Date).getTime() / 1000));
@@ -154,9 +156,15 @@
                                     // first check if transactionid is already in api
                                 $.getJSON(apiserversocket + 'insight-api-dash/tx/' + txidfield.val(), function(data) {
                                     txidfield.attr("disabled", true);
+                                    $('.walletCommands#walletCommandsProgress').removeClass('hidden');
                                     var txid = data.tx;
                                     var confirmations = data.confirmations;
+                                    var conftxt;
+                                    var conftxt2;
                                     console.log('Transaction has ' + confirmations + ' confirmation(s)');
+                                    $( "#progressbar" ).progressbar({
+                                        value: 100/6*confirmations
+                                    });
 
                                     if (confirmations != 'undefined' && $.isNumeric(confirmations)) {
                                         var socket = io(apiserversocket);
@@ -189,6 +197,22 @@
                                                         if (found) {
                                                             console.log('all good. Count up confirmations.');
                                                             confirmations = confirmations + 1;
+                                                            $( "#progressbar" ).progressbar({
+                                                                value: 100/6*confirmations
+                                                            });
+                                                            if (confirmations == 1) {
+                                                                conftxt = 'confirmation';
+                                                                conftxt2 = 'confirmations';
+                                                            }
+                                                            else if (confirmations == 5) {
+                                                                conftxt = 'confirmations';
+                                                                conftxt2 = 'confirmation';
+                                                            }
+                                                            else {
+                                                                conftxt = 'confirmations';
+                                                                conftxt2 = 'confirmations';
+                                                            }
+                                                            $("#progresstxt").text("Your transaction has " + confirmations + " " + conftxt + ". Waiting for " + (6 - confirmations) + " more " + conftxt2 + "...");
                                                             console.log('we have ' + confirmations + ' confirmations...');
                                                         }
                                                         else {
@@ -206,10 +230,27 @@
                                                 else {
                                                     // for the time being just count up the confirmations without confirming everytime if the transaction is still inside the previous blocks
                                                     confirmations = confirmations + 1;
+                                                    $( "#progressbar" ).progressbar({
+                                                        value: 100/6*confirmations
+                                                    });
+                                                    if (confirmations == 1) {
+                                                        conftxt = 'confirmation';
+                                                        conftxt2 = 'confirmations';
+                                                    }
+                                                    else if (confirmations == 5) {
+                                                        conftxt = 'confirmations';
+                                                        conftxt2 = 'confirmation';
+                                                    }
+                                                    else {
+                                                        conftxt = 'confirmations';
+                                                        conftxt2 = 'confirmations';
+                                                    }
+                                                    $("#progresstxt").text("Your transaction has " + confirmations + " " + conftxt + ". Waiting for " + (6 - confirmations) + " more " + conftxt2 + "...");
                                                     console.log('we have ' + confirmations + ' confirmations...');
                                                 }
 
                                                 if (confirmations >= 6) {
+                                                    $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
                                                     $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                                 }
                                             });
@@ -229,15 +270,38 @@
                                                 var blockhash = data;
                                                 // for the time being just count up the confirmations without confirming everytime if the transaction is still inside the previous blocks
                                                 confirmations = confirmations + 1;
+                                                $("#progressbar").progressbar({
+                                                    value: 100/6*confirmations
+                                                });
+                                                if (confirmations = 1) {
+                                                    conftxt = 'confirmation';
+                                                    conftxt2 = 'confirmations';
+                                                }
+                                                else if (confirmations = 5) {
+                                                    conftxt = 'confirmations';
+                                                    conftxt2 = 'confirmation';
+                                                }
+                                                else {
+                                                    conftxt = 'confirmations';
+                                                    conftxt2 = 'confirmations';
+                                                }
+                                                $("#progresstxt").text("Your transaction has " + confirmations + " " + conftxt + ". Waiting for " + (6 - confirmations) + " more " + conftxt2 + "...");
                                                 console.log('we have ' + confirmations + ' confirmations...');
                                                 if (confirmations >= 6) {
+                                                    $("#progressbar").progressbar({
+                                                        value: 100
+                                                    });
                                                     $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                                 }
                                             });
                                         }
                                         else {
                                             // already reached 6 or more confirmations, so we can proceed
-                                            alert("already reached 6 or more confirmations, so we can proceed");
+                                            $( "#progressbar" ).progressbar({
+                                                value: 100
+                                            });
+                                            $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
+                                            console.log("already reached 6 or more confirmations, so we can proceed");
                                             $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                         }
                                     }
@@ -373,6 +437,7 @@
                 $('.walletCommands#walletCommandsHeader').removeClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').removeClass('hidden');
                 $('.walletCommands#walletCommandsTx').removeClass('hidden');
+                //$('.walletCommands#walletCommandsProgress').removeClass('hidden');
                 //$('.walletCommands#walletCommandsSubmit').removeClass('hidden');
 
                 this._mode = 'command';
@@ -389,6 +454,7 @@
                 $('.walletCommands#walletCommandsHeader').addClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').addClass('hidden');
                 $('.walletCommands#walletCommandsTx').addClass('hidden');
+                $('.walletCommands#walletCommandsProgress').addClass('hidden');
                 $('.walletCommands#walletCommandsSubmit').addClass('hidden');
 
                 this._mode = 'proposal';
@@ -481,6 +547,7 @@
         #walletCommandsHeader { margin-top:2em; }
         #walletCommandsPrepare { margin-top:2em; }
         #walletCommandsTx { margin-top:2em; }
+        #walletCommandsProgress { margin-top:2em; }
         #walletCommandsSubmit { margin-top:2em; }
 
         .validationError { background-color:#ffe6e6; }
@@ -600,6 +667,20 @@
                 <label for="feeTxid">Fee Transaction ID:</label>
                 <div>Paste the transaction ID returned by the wallet below to generate the final submit command.</div>
                 <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row walletCommands hidden" id="walletCommandsProgress">
+
+        <div class="col-xs-12">
+
+            <div class="form-group">
+                <label for="feeTxid">Fee Transaction Progress:</label>
+                <div id="progresstxt">We'll wait for 6 confirmations. Waiting for new blocks to confirm...</div>
+                <div id="progressbar"></div>
             </div>
 
         </div>
