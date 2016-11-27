@@ -10,20 +10,110 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="bitcore-lib-dash.js"></script>
-
+    <script src="https://dev-test.dash.org:3001/socket.io/socket.io.js"></script>
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
+        var apiserversocket = 'https://dev-test.dash.org:3001/';
+        //number of days to have as buffer for proposal start date before jumping to next month
+        var bufferdays = 3;
+        var blockheight;
+        var progresstxt = "As of yet your transaction has 0 confirmations. We'll wait for 6 confirmations until you can submit your proposal. Waiting for new blocks to confirm...";
         var gov = new Bitcore.GovObject.Proposal();
 
         $(document).ready(function() {
 
             $("#time").val(Math.floor((new Date).getTime() / 1000));
 
-            var opts = { dateFormat: $.datepicker.ISO_8601 };
+            var opts = { dateFormat: $.datepicker.ISO_8601 }; // TODO remove
 
-            $('#start_epoch').datepicker(opts, 'getdate');
-            $('#end_epoch').datepicker(opts, 'getdate');
+            $("#progresstxt").text(progresstxt);
+
+            $.getJSON(apiserversocket + "insight-api-dash/status?q=getinfo", function( data ) {
+                var timefield = $("#time");
+                timefield.val(Math.floor((new Date).getTime() / 1000));
+                console.log('time: ' + timefield.val());
+                blockheight = data.info.blocks;
+                console.log('network: ' + gov.network);
+                var budgetPaymentCycleBlocks = getBudgetPaymentCycleBlocks();
+                var nextsuperblock = Math.round(blockheight/budgetPaymentCycleBlocks) * budgetPaymentCycleBlocks;
+                var selectblock = nextsuperblock;
+
+                console.log('budgetPaymentCycleBlocks: ' + budgetPaymentCycleBlocks);
+                console.log('blockheight: ' + blockheight);
+                console.log('next superblock ' + nextsuperblock);
+
+                var optionsStart = [];
+                var optionsEnd = [];
+                var numOfSuperBlockDates = 12;
+
+                // Clear the options first
+                var start_epoch = $("#start_epoch");
+                var end_epoch = $("#end_epoch");
+                start_epoch.find("option").each(function(index, option) {
+                    $(option).remove();
+                });
+                end_epoch.find("option").each(function(index, option) {
+                    $(option).remove();
+                });
+
+                var blocksleft = nextsuperblock - blockheight;
+                for (i = 0; i < numOfSuperBlockDates; i ++)
+                {
+                    var timeleft;
+                    var blockdiff = nextsuperblock - blockheight;
+                    var nextsuperblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
+                    var d = $.datepicker.formatDate('yy-mm-dd', new Date(nextsuperblocktimestamp));
+
+                    if (i == 0) {
+                        var daysleft = Math.round( blocksleft/554 * 10) / 10; // day rounded to one decimal
+                        if (daysleft >= 2) {
+                            timeleft = daysleft + ' days'
+                        }
+                        else {
+                                timeleft = daysleft + ' day'
+                        }
+                        optionsStart.push("<option value='" + nextsuperblock + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                    }
+                    else {
+                        if (i == 1) {
+                            timeleft = '1 month';
+                        }
+                        else {
+                            timeleft = i + ' months';
+                        }
+                        optionsStart.push("<option value='" + nextsuperblock + "'>block " + nextsuperblock + " in " + timeleft + " (" + d + ")</option>");
+                        if (i == numOfSuperBlockDates - 1) {
+                            timeleft = numOfSuperBlockDates + ' month';
+                            nextsuperblock += budgetPaymentCycleBlocks;
+                        }
+                    }
+                    nextsuperblock += budgetPaymentCycleBlocks;
+                }
+
+                start_epoch.append(optionsStart.join(""));
+
+                //populate budget cycle dropdown
+                for (i = 1; i < 100; i ++)
+                {
+                    if (i == 1) {
+                        optionsEnd.push("<option value='" + i + "'>one-time payment</option>");
+                    }
+                    else {
+                        optionsEnd.push("<option value='" + i + "'>payment once a month for " + i + " months</option>");
+                    }
+
+                }
+
+                end_epoch.append(optionsEnd.join(""));
+
+                //if next superblock is less than 3 days (60*24*3/2.6) away, select next month's superblock by default so proposal has more time to be voted upon
+                if (selectblock - blockheight < (60*24*bufferdays/2.6)) {
+                    selectblock += budgetPaymentCycleBlocks;
+                    start_epoch.val(selectblock);
+                    nextsuperblocktimestamp = nextsuperblocktimestamp + budgetPaymentCycleBlocks * (2.6 * 60 * 1000);
+                }
+            });
 
             $('#prepareProposal').click(function() {
                 copyToClipboard($(this).attr('id'));
@@ -33,7 +123,17 @@
                 copyToClipboard($(this).attr('id'));
             });
 
+            $('#feeTxid').focus(function() {
+                if ($(this).hasClass('validationError')) {
+                    $(this).val('');
+                }
+                $(this).removeClass('validationError');
+            });
+
             $('.createProposal input').focus(function() {
+                if ($(this).hasClass('validationError')) {
+                    $(this).val('');
+                }
                 $(this).removeClass('validationError');
             });
 
@@ -49,20 +149,229 @@
 
                     $('#feeTxid').on('input', function() {
                         if ($(this).val().length > 0) {
+
                             var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
                             console.log(submitCommand);
+
+                            var txidfield = $('#feeTxid');
+                            console.log('value entered: ' + txidfield.val());
+
                             $('textarea#submitProposal').val(submitCommand);
-                            $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
-                        } else {
+
+                            txidfield.change(function() {
+                                // Check input( $( this ).val() ) for validity here
+                                console.log('there is something wrong with your transaction ID: ' + $('#feeTxid').val() + ' Please copy and paste it here .');
+                                txidfield.val('')
+                            });
+
+                            //some checks if feeTxid seems valid before we check the api
+                            if (txidfield.val().length == 64) {
+                                if (isAlphaNumeric(txidfield.val())) {
+                                    txidfield.unbind( "change" );
+                                    console.log('feeTxid seems good: ' + txidfield.val());
+                                    console.log("wait while we check the api!");
+
+                                        // first check if transactionid is already in api
+                                    $.getJSON(apiserversocket + 'insight-api-dash/tx/' + txidfield.val(), function(data) {
+                                        txidfield.attr("disabled", true);
+                                        $('.walletCommands#walletCommandsProgress').removeClass('hidden');
+                                        var txid = data.tx;
+                                        var confirmations = data.confirmations;
+                                        var conftxt;
+                                        var conftxt2;
+                                        var progbarval;
+                                        console.log('Transaction has ' + confirmations + ' confirmation(s)');
+                                        progbarval = 100/6*confirmations;
+                                        $("#progressbar").progressbar({value: progbarval})
+                                                .children('.ui-progressbar-value')
+                                                .html(progbarval.toPrecision(3) + '%')
+                                                .css("display", "block");
+                                        if (confirmations != 'undefined' && $.isNumeric(confirmations)) {
+                                            var socket = io(apiserversocket);
+                                            if (confirmations == 0) {
+                                                // we have to count the blocks and wait for 6 confirmations
+                                                console.log("we have to count the blocks and wait for 6 confirmations");
+                                                eventToListenTo = 'block';
+                                                room = 'inv';
+                                                socket.on('connect', function() {
+                                                    // Join the room.
+                                                    socket.emit('subscribe', room);
+                                                    console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
+                                                });
+                                                socket.on(eventToListenTo, function(data) {
+                                                    console.log("New block received: " + data + " time: " + data.time);
+                                                    blockhash = data;
+                                                    // let's check if transaction is really in this block or not
+                                                    if (confirmations == 0) {
+                                                        $.getJSON(apiserversocket + 'insight-api-dash/txs/?block=' + blockhash, function(data) {
+                                                            var txs = data.txs;
+                                                            var found;
+                                                            var numOfTxs = txs.length;
+                                                            for (var i = 0; i < numOfTxs; i++) {
+                                                                console.log('txs' + i + ': ' + txs[i].txid);
+                                                                if (txs[i].txid == txidfield.val()) {
+                                                                    console.log('found tx!');
+                                                                    found = true;
+                                                                }
+                                                            }
+                                                            if (found) {
+                                                                console.log('all good. Count up confirmations.');
+                                                                confirmations = confirmations + 1;
+                                                                progbarval = 100/6*confirmations;
+                                                                $("#progressbar").progressbar({value: progbarval})
+                                                                        .children('.ui-progressbar-value')
+                                                                        .html(progbarval.toPrecision(3) + '%')
+                                                                        .css("display", "block");
+                                                                if (confirmations == 1) {
+                                                                    conftxt = 'confirmation';
+                                                                    conftxt2 = 'confirmations';
+                                                                }
+                                                                else if (confirmations == 5) {
+                                                                    conftxt = 'confirmations';
+                                                                    conftxt2 = 'confirmation';
+                                                                }
+                                                                else {
+                                                                    conftxt = 'confirmations';
+                                                                    conftxt2 = 'confirmations';
+                                                                }
+                                                                $("#progresstxt").text("Your transaction has " + confirmations + " " + conftxt + ". Waiting for " + (6 - confirmations) + " more " + conftxt2 + "...");
+                                                                console.log('we have ' + confirmations + ' confirmations...');
+                                                            }
+                                                            else {
+                                                                console.log('txid not in new block');
+                                                            }
+                                                        }).fail(function(jqXHR) {
+                                                            if (jqXHR.status == 400) {
+                                                                // there seems to be a problem with your feeTxid because txid is not found in api
+                                                                console.log('block hash not found in api!');
+                                                            } else {
+                                                                console.log('There seems to be a problem with the api connection. Maybe endpoint resyncing?');
+                                                            }
+                                                        });
+                                                    }
+                                                    else {
+                                                        // for the time being just count up the confirmations without confirming everytime if the transaction is still inside the previous blocks
+                                                        confirmations = confirmations + 1;
+                                                        progbarval = 100/6*confirmations;
+                                                        if (confirmations == 1) {
+                                                            conftxt = 'confirmation';
+                                                            conftxt2 = 'confirmations';
+                                                        }
+                                                        else if (confirmations == 5) {
+                                                            conftxt = 'confirmations';
+                                                            conftxt2 = 'confirmation';
+                                                        }
+                                                        else {
+                                                            conftxt = 'confirmations';
+                                                            conftxt2 = 'confirmations';
+                                                        }
+                                                        $("#progresstxt").text("Your transaction has " + confirmations + " " + conftxt + ". Waiting for " + (6 - confirmations) + " more " + conftxt2 + "...");
+                                                        console.log('we have ' + confirmations + ' confirmations...');
+                                                    }
+
+                                                    if (confirmations >= 6) {
+                                                        progbarval = 100;
+                                                        $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
+                                                        $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                                    }
+                                                    $("#progressbar").progressbar({value: progbarval})
+                                                            .children('.ui-progressbar-value')
+                                                            .html(progbarval.toPrecision(3) + '%')
+                                                            .css("display", "block");
+                                                });
+                                            }
+                                            else if (confirmations > 0 && confirmations <= 5) {
+                                                // we have to count the blocks and wait for outstanding confirmations
+                                                console.log("we have to count the blocks and wait for outstanding confirmations");
+                                                eventToListenTo = 'block';
+                                                room = 'inv';
+                                                socket.on('connect', function() {
+                                                    // Join the room.
+                                                    socket.emit('subscribe', room);
+                                                    console.log("listening for '" + eventToListenTo + "' in '" + room + "'");
+                                                });
+                                                socket.on(eventToListenTo, function(data) {
+                                                    console.log("New block received: " + data + " time: " + data.time);
+                                                    // for the time being just count up the confirmations without confirming everytime if the transaction is still inside the previous blocks
+                                                    confirmations = confirmations + 1;
+                                                    progbarval = 100/6*confirmations;
+                                                    $("#progressbar").progressbar({value: progbarval})
+                                                            .children('.ui-progressbar-value')
+                                                            .html(progbarval.toPrecision(3) + '%')
+                                                            .css("display", "block");
+                                                    if (confirmations = 1) {
+                                                        conftxt = 'confirmation';
+                                                        conftxt2 = 'confirmations';
+                                                    }
+                                                    else if (confirmations = 5) {
+                                                        conftxt = 'confirmations';
+                                                        conftxt2 = 'confirmation';
+                                                    }
+                                                    else {
+                                                        conftxt = 'confirmations';
+                                                        conftxt2 = 'confirmations';
+                                                    }
+                                                    $("#progresstxt").text("Your transaction has " + confirmations + " " + conftxt + ". Waiting for " + (6 - confirmations) + " more " + conftxt2 + "...");
+                                                    console.log('we have ' + confirmations + ' confirmations...');
+                                                    if (confirmations >= 6) {
+                                                        progbarval = 100;
+                                                        $("#progressbar").progressbar({value: progbarval})
+                                                                .children('.ui-progressbar-value')
+                                                                .html(progbarval + '%')
+                                                                .css("display", "block");
+                                                        $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                                    }
+                                                });
+                                            }
+                                            else {
+                                                // already reached 6 or more confirmations, so we can proceed
+                                                progbarval = 100;
+                                                $("#progressbar").progressbar({value: progbarval})
+                                                        .children('.ui-progressbar-value')
+                                                        .html(progbarval + '%')
+                                                        .css("display", "block");
+                                                $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
+                                                console.log("already reached 6 or more confirmations, so we can proceed");
+                                                $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                            }
+                                        }
+                                        else {
+                                            console.log('Something went terribly wrong. Faulty api data?');
+                                            txidfield.attr("disabled", false);
+                                        }
+                                    }).fail(function(jqXHR) {
+                                        if (jqXHR.status == 400) {
+                                            // there seems to be a problem with your feeTxid because txid is not found in api
+                                            console.log('problem with feeTxid! Ask for new input!');
+                                            alert("Check again and please enter your correct TxID!");
+                                            txidfield.attr("disabled", false);
+                                        } else {
+                                            txidfield.attr("disabled", false);
+                                            console.log('There seems to be a problem with the api connection');
+                                        }
+                                    });
+                                }
+                                else {
+                                    $('#feeTxid').addClass('validationError');
+                                    $('#feeTxid').val('Your transacton ID is invalid. It must be alphanumeric. Please just copy & paste from console.');
+                                    console.log("there is something wrong with your transaction ID. It must be alphanumeric!")
+                                }
+                            }
+                            else {
+                                $('#feeTxid').addClass('validationError');
+                                $('#feeTxid').val('Your transacton ID is invalid. Please just copy & paste from console.');
+                                console.log("there is something wrong with your transaction ID. It must be exactly 64 characters!")
+                            }
+                        }
+                        else {
                             $('textarea#submitProposal').val('');
                             $('.walletCommands#walletCommandsSubmit').addClass('hidden');
                         }
+
                     });
 
                     $('#btnEdit').click(function() {
-
                         proposal.createProposal();
-
                     });
 
                     $('#btnNew').click(function() {
@@ -75,7 +384,7 @@
         var ProposalGenerator = function(gov) {
             this._mode = 'proposal';
             this.gov = gov;
-            this.gov.network = 'testnet';
+            this.gov.network = 'livenet';
 
             // proposal basic fields
             this.gov.name = $('#name').val();
@@ -84,8 +393,13 @@
             this.gov.payment_amount = parseFloat($('#payment_amount').val());
 
             // format dates for gobject serialization
-            this.gov.start_epoch = (new Date($('#start_epoch').val()) / 1000) || null;
-            this.gov.end_epoch = (new Date($('#end_epoch').val()) / 1000) || null;
+            var start_epoch = $('#start_epoch');
+            var startdate = formattedDateForSuperblockHeight(start_epoch.val());
+            console.log('startdate: ' + startdate);
+            this.gov.start_epoch = (new Date(startdate)) || null;
+            var enddate = formattedDateForSuperblockHeight(start_epoch.val(),$('#end_epoch').val());
+            console.log('enddate: ' + enddate);
+            this.gov.end_epoch = (new Date(enddate)) || null;
 
             // hidden elements
             this.gov.type = parseInt($('#type').val());
@@ -98,6 +412,25 @@
             catch (e) {
 
                 switch(e.message) {
+
+                    case 'Invalid Name':
+                        console.log("error: invalid name");
+                        $('#name').addClass('validationError');
+                        $('#name').val("Invalid name. Please enter a name without spaces and weird characters. E.g. can use a '-' or '_' instead of a space.");
+                        break;
+
+                    case 'Invalid URL':
+                        console.log("Error: invalid url");
+                        $('#url').addClass('validationError');
+                        $('#url').val("There is a formatting error in your URL. Did you forget the leading 'http://'?");
+                        break;
+
+                    case 'Invalid Payment Amount':
+                        console.log("Error: invalid payment amount");
+                        $('#payment_amount').addClass('validationError');
+                        $('#payment_amount').val("Invalid payment amount. Please enter a number from 1 - 7500");
+                        break;
+
                     case 'Invalid Timespan':
                         console.log("Error: invalid timespan");
                         $('#start_epoch, #end_epoch').addClass('validationError');
@@ -116,21 +449,7 @@
                     case 'Invalid Address':
                         console.log("Error: invalid address");
                         $('#payment_address').addClass('validationError');
-                        break;
-
-                    case 'Invalid Payment Amount':
-                        console.log("Error: invalid payment amount");
-                        $('#payment_amount').addClass('validationError');
-                        break;
-
-                    case 'Invalid URL':
-                        console.log("Error: invalid url");
-                        $('#url').addClass('validationError');
-                        break;
-
-                    case 'Invalid Name':
-                        console.log("error: invalid name");
-                        $('#name').addClass('validationError');
+                        $('#payment_address').val("Invalid Dash Address. Please just copy & paste from wallet.");
                         break;
 
                     default:
@@ -157,7 +476,8 @@
                 $('.walletCommands#walletCommandsHeader').removeClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').removeClass('hidden');
                 $('.walletCommands#walletCommandsTx').removeClass('hidden');
-                $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                //$('.walletCommands#walletCommandsProgress').removeClass('hidden');
+                //$('.walletCommands#walletCommandsSubmit').removeClass('hidden');
 
                 this._mode = 'command';
             }
@@ -173,6 +493,7 @@
                 $('.walletCommands#walletCommandsHeader').addClass('hidden');
                 $('.walletCommands#walletCommandsPrepare').addClass('hidden');
                 $('.walletCommands#walletCommandsTx').addClass('hidden');
+                $('.walletCommands#walletCommandsProgress').addClass('hidden');
                 $('.walletCommands#walletCommandsSubmit').addClass('hidden');
 
                 this._mode = 'proposal';
@@ -188,6 +509,9 @@
 
         function setFormEditable(edit) {
             $('.createProposal input').each(function() {
+                $(this).attr("disabled", edit);
+            });
+            $('.createProposal select').each(function() {
                 $(this).attr("disabled", edit);
             });
 
@@ -207,6 +531,47 @@
             document.execCommand('copy');
         };
 
+        getBudgetPaymentCycleBlocks = function() {
+            // Amount of blocks in a months period of time (using 2.6 minutes per) = (60*24*30)/2.6
+            if (gov.network == 'livenet') {
+                return 16616;
+            }
+            else {
+                //for testing purposes
+                return 50; //ten times per day
+            }
+        };
+
+        formattedDateForSuperblockHeight = function(startheight, months) {
+            months = months || 0;
+            var endheight;
+            var blockdiff;
+            if (months !== 0) {
+                endheight = (parseInt(startheight) + (getBudgetPaymentCycleBlocks()*months));
+                blockdiff = endheight - blockheight;
+            }
+            else {
+                blockdiff = startheight - blockheight;
+            }
+            var superblocktimestamp = $.now() + blockdiff * (2.6 * 60 * 1000);
+            return $.datepicker.formatDate('yy-mm-dd', new Date(superblocktimestamp));
+        };
+
+        function isAlphaNumeric(str) {
+            var code, i, len;
+
+            for (i = 0, len = str.length; i < len; i++) {
+                code = str.charCodeAt(i);
+                if (!(code > 47 && code < 58) && // numeric (0-9)
+                        !(code > 64 && code < 91) && // upper alpha (A-Z)
+                        !(code > 96 && code < 123)) { // lower alpha (a-z)
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
     </script>
 
     <style type="text/css">
@@ -221,6 +586,7 @@
         #walletCommandsHeader { margin-top:2em; }
         #walletCommandsPrepare { margin-top:2em; }
         #walletCommandsTx { margin-top:2em; }
+        #walletCommandsProgress { margin-top:2em; }
         #walletCommandsSubmit { margin-top:2em; }
 
         .validationError { background-color:#ffe6e6; }
@@ -261,7 +627,7 @@
 
             <div class="form-group">
                 <label for="start_epoch">Proposal Start Date:</label>
-                <input type="text" class="form-control" id="start_epoch" value="" placeholder="">
+                <select name="start_epoch" class="form-control" id="start_epoch"></select>
             </div>
 
             <div type="submit" class="btn btn-primary" id="btnPrepare">Create Proposal</div>
@@ -303,8 +669,8 @@
             </div>
 
             <div class="form-group">
-                <label for="end_epoch">Proposal End Date:</label>
-                <input type="text" class="form-control" id="end_epoch" value="" placeholder="">
+                <label for="end_epoch">Choose payment cycle:</label>
+                <select name="end_epoch" class="form-control" id="end_epoch"></select>
             </div>
 
         </div>
@@ -340,6 +706,20 @@
                 <label for="feeTxid">Fee Transaction ID:</label>
                 <div>Paste the transaction ID returned by the wallet below to generate the final submit command.</div>
                 <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row walletCommands hidden" id="walletCommandsProgress">
+
+        <div class="col-xs-12">
+
+            <div class="form-group">
+                <label for="feeTxid">Fee Transaction Progress:</label>
+                <div id="progresstxt">We'll wait for 6 confirmations. Waiting for new blocks to confirm...</div>
+                <div id="progressbar"></div>
             </div>
 
         </div>
