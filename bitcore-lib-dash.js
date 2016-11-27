@@ -3517,8 +3517,10 @@ GovObject.prototype._verifyPayment = function(payment) {
 };
 
 GovObject.prototype._verifyAddress = function(address, network) {
-    var validAddress = Address.isValid(address, network);
-    return validAddress;
+    return address.length > 26;
+    // - disable full check until checksum bug in Ubuntu Firefox is fixed
+    //var validAddress = Address.isValid(address, network);
+    //return validAddress;
 };
 
 GovObject.prototype._verifyUrl = function(url) {
@@ -3618,9 +3620,10 @@ GovObject.prototype.getSerializationError = function(opts) {
     }
 
     // check address
-    if (!this._verifyAddress(this.payment_address,this.network)) {
+    if (!this._verifyAddress(this.payment_address)) {
         return new errors.GovObject.Proposal.invalidAddress();
     }
+
 
     // check payment amount
     if (this._verifyPayment(this.payment_amount)) {
@@ -25135,13 +25138,22 @@ utils.intFromLE = intFromLE;
 module.exports={
   "_args": [
     [
-      "elliptic@^6.0.0",
-      "/home/jon/Development/bitcore-lib-dash/node_modules/browserify-sign"
+      {
+        "raw": "elliptic@^6.0.0",
+        "scope": null,
+        "escapedName": "elliptic",
+        "name": "elliptic",
+        "rawSpec": "^6.0.0",
+        "spec": ">=6.0.0 <7.0.0",
+        "type": "range"
+      },
+      "/home/andy/src/bitcore-lib-dash/node_modules/browserify-sign"
     ]
   ],
   "_from": "elliptic@>=6.0.0 <7.0.0",
   "_id": "elliptic@6.3.2",
   "_inCache": true,
+  "_installable": true,
   "_location": "/browserify-sign/elliptic",
   "_nodeVersion": "6.3.0",
   "_npmOperationalInternal": {
@@ -25149,16 +25161,17 @@ module.exports={
     "tmp": "tmp/elliptic-6.3.2.tgz_1473938837205_0.3108903462998569"
   },
   "_npmUser": {
-    "email": "fedor@indutny.com",
-    "name": "indutny"
+    "name": "indutny",
+    "email": "fedor@indutny.com"
   },
   "_npmVersion": "3.10.3",
   "_phantomChildren": {},
   "_requested": {
-    "name": "elliptic",
     "raw": "elliptic@^6.0.0",
-    "rawSpec": "^6.0.0",
     "scope": null,
+    "escapedName": "elliptic",
+    "name": "elliptic",
+    "rawSpec": "^6.0.0",
     "spec": ">=6.0.0 <7.0.0",
     "type": "range"
   },
@@ -25169,10 +25182,10 @@ module.exports={
   "_shasum": "e4c81e0829cf0a65ab70e998b8232723b5c1bc48",
   "_shrinkwrap": null,
   "_spec": "elliptic@^6.0.0",
-  "_where": "/home/jon/Development/bitcore-lib-dash/node_modules/browserify-sign",
+  "_where": "/home/andy/src/bitcore-lib-dash/node_modules/browserify-sign",
   "author": {
-    "email": "fedor@indutny.com",
-    "name": "Fedor Indutny"
+    "name": "Fedor Indutny",
+    "email": "fedor@indutny.com"
   },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
@@ -25209,12 +25222,11 @@ module.exports={
   ],
   "gitHead": "cbace4683a4a548dc0306ef36756151a20299cd5",
   "homepage": "https://github.com/indutny/elliptic",
-  "installable": true,
   "keywords": [
-    "Cryptography",
     "EC",
     "Elliptic",
-    "curve"
+    "curve",
+    "Cryptography"
   ],
   "license": "MIT",
   "main": "lib/elliptic.js",
@@ -25226,6 +25238,7 @@ module.exports={
   ],
   "name": "elliptic",
   "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/indutny/elliptic.git"
@@ -27572,17 +27585,34 @@ arguments[4][108][0].apply(exports,arguments)
 module.exports={
   "_args": [
     [
-      "elliptic@^6.0.0",
-      "/home/jon/Development/bitcore-lib-dash/node_modules/browserify-sign"
+      {
+        "raw": "elliptic@^6.0.0",
+        "scope": null,
+        "escapedName": "elliptic",
+        "name": "elliptic",
+        "rawSpec": "^6.0.0",
+        "spec": ">=6.0.0 <7.0.0",
+        "type": "range"
+      },
+      "/home/andy/src/bitcore-lib-dash/node_modules/browserify-sign"
     ],
     [
-      "elliptic@^6.0.0",
-      "/home/jon/Development/bitcore-lib-dash/node_modules/create-ecdh"
+      {
+        "raw": "elliptic@^6.0.0",
+        "scope": null,
+        "escapedName": "elliptic",
+        "name": "elliptic",
+        "rawSpec": "^6.0.0",
+        "spec": ">=6.0.0 <7.0.0",
+        "type": "range"
+      },
+      "/home/andy/src/bitcore-lib-dash/node_modules/create-ecdh"
     ]
   ],
-  "_from": "elliptic@>=6.0.0 <7.0.0",
+  "_from": "elliptic@^6.0.0",
   "_id": "elliptic@6.3.2",
   "_inCache": true,
+  "_installable": true,
   "_location": "/create-ecdh/elliptic",
   "_nodeVersion": "6.3.0",
   "_npmOperationalInternal": {
@@ -27590,28 +27620,31 @@ module.exports={
     "tmp": "tmp/elliptic-6.3.2.tgz_1473938837205_0.3108903462998569"
   },
   "_npmUser": {
-    "email": "fedor@indutny.com",
-    "name": "indutny"
+    "name": "indutny",
+    "email": "fedor@indutny.com"
   },
   "_npmVersion": "3.10.3",
   "_phantomChildren": {},
   "_requested": {
-    "name": "elliptic",
     "raw": "elliptic@^6.0.0",
-    "rawSpec": "^6.0.0",
     "scope": null,
+    "escapedName": "elliptic",
+    "name": "elliptic",
+    "rawSpec": "^6.0.0",
     "spec": ">=6.0.0 <7.0.0",
     "type": "range"
   },
   "_requiredBy": [
     "/create-ecdh"
   ],
+  "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.3.2.tgz",
+  "_shasum": "e4c81e0829cf0a65ab70e998b8232723b5c1bc48",
   "_shrinkwrap": null,
   "_spec": "elliptic@^6.0.0",
-  "_where": "/home/jon/Development/bitcore-lib-dash/node_modules/create-ecdh",
+  "_where": "/home/andy/src/bitcore-lib-dash/node_modules/create-ecdh",
   "author": {
-    "email": "fedor@indutny.com",
-    "name": "Fedor Indutny"
+    "name": "Fedor Indutny",
+    "email": "fedor@indutny.com"
   },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
@@ -27648,12 +27681,11 @@ module.exports={
   ],
   "gitHead": "cbace4683a4a548dc0306ef36756151a20299cd5",
   "homepage": "https://github.com/indutny/elliptic",
-  "installable": true,
   "keywords": [
-    "Cryptography",
     "EC",
     "Elliptic",
-    "curve"
+    "curve",
+    "Cryptography"
   ],
   "license": "MIT",
   "main": "lib/elliptic.js",
@@ -27665,6 +27697,7 @@ module.exports={
   ],
   "name": "elliptic",
   "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/indutny/elliptic.git"
@@ -32781,8 +32814,16 @@ exports.shr64_lo = shr64_lo;
 module.exports={
   "_args": [
     [
-      "elliptic@https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
-      "/home/jon/Development/bitcore-lib-dash"
+      {
+        "raw": "elliptic@https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
+        "scope": null,
+        "escapedName": "elliptic",
+        "name": "elliptic",
+        "rawSpec": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
+        "spec": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
+        "type": "remote"
+      },
+      "/home/andy/src/bitcore-lib-dash"
     ]
   ],
   "_from": "elliptic@=3.0.3",
@@ -32793,26 +32834,25 @@ module.exports={
     "inherits": "2.0.1"
   },
   "_requested": {
-    "name": "elliptic",
     "raw": "elliptic@https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
-    "rawSpec": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
     "scope": null,
+    "escapedName": "elliptic",
+    "name": "elliptic",
+    "rawSpec": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
     "spec": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
     "type": "remote"
   },
   "_requiredBy": [
-    "/",
-    "/browserify-sign",
-    "/create-ecdh"
+    "/"
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
   "_shasum": "865c9b420bfbe55006b9f969f97a0d2c44966595",
   "_shrinkwrap": null,
   "_spec": "elliptic@https://registry.npmjs.org/elliptic/-/elliptic-3.0.3.tgz",
-  "_where": "/home/jon/Development/bitcore-lib-dash",
+  "_where": "/home/andy/src/bitcore-lib-dash",
   "author": {
-    "email": "fedor@indutny.com",
-    "name": "Fedor Indutny"
+    "name": "Fedor Indutny",
+    "email": "fedor@indutny.com"
   },
   "bugs": {
     "url": "https://github.com/indutny/elliptic/issues"
@@ -32833,10 +32873,10 @@ module.exports={
   },
   "homepage": "https://github.com/indutny/elliptic",
   "keywords": [
-    "Cryptography",
     "EC",
     "Elliptic",
-    "curve"
+    "curve",
+    "Cryptography"
   ],
   "license": "MIT",
   "main": "lib/elliptic.js",
