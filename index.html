@@ -15,13 +15,19 @@
 
         var Bitcore = require('bitcore-lib-dash');
         var apiserversocket = 'https://dev-test.dash.org:3001/';
+
         //number of days to have as buffer for proposal start date before jumping to next month
         var bufferdays = 3;
         var blockheight;
         var progresstxt = "As of yet your transaction has 0 confirmations. We'll wait for 6 confirmations until you can submit your proposal. Waiting for new blocks to confirm...";
+
         var gov = new Bitcore.GovObject.Proposal();
 
         $(document).ready(function() {
+
+            $("#time").val(Math.floor((new Date).getTime() / 1000));
+
+            var opts = { dateFormat: $.datepicker.ISO_8601 }; // TODO remove
 
             $("#progresstxt").text(progresstxt);
 
@@ -145,10 +151,13 @@
 
                     $('#feeTxid').on('input', function() {
                         if ($(this).val().length > 0) {
+
+                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
+                            console.log(submitCommand);
+
                             var txidfield = $('#feeTxid');
                             console.log('value entered: ' + txidfield.val());
 
-                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
                             $('textarea#submitProposal').val(submitCommand);
 
                             txidfield.change(function() {
@@ -388,11 +397,14 @@
             // format dates for gobject serialization
             var start_epoch = $('#start_epoch');
             var startdate = formattedDateForSuperblockHeight(start_epoch.val());
+
             console.log('startdate: ' + startdate);
-            this.gov.start_epoch = (new Date(startdate)) || null;
+            this.gov.start_epoch = (new Date(startdate) / 1000) || null;
+
             var enddate = formattedDateForSuperblockHeight(start_epoch.val(),$('#end_epoch').val());
             console.log('enddate: ' + enddate);
-            this.gov.end_epoch = (new Date(enddate)) || null;
+
+            this.gov.end_epoch = (new Date(enddate) / 1000) || null;
 
             // hidden elements
             this.gov.type = parseInt($('#type').val());
@@ -459,8 +471,9 @@
         ProposalGenerator.prototype.walletCommands = function() {
             var gov = this.gov;
 
-            var propCommand = "gobject prepare "+$('#parentHash').val() + " " + $('#revision').val() +"  " + $('#time').val() +" " + gov.serialize();
-            $("textarea#prepareProposal").val(propCommand);
+            var prepCommand = "gobject prepare "+$('#parentHash').val() + " " + $('#revision').val() +" " + $('#time').val() +" " + gov.serialize();
+            console.log(prepCommand);
+            $("textarea#prepareProposal").val(prepCommand);
 
             if(this._mode == 'proposal') {
                 setFormEditable(true);
