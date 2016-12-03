@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/master.css">
 
     <script src="https://code.jquery.com/jquery-3.1.0.js" integrity="sha256-slogkvB1K3VOkzAI8QITxV3VzpOnkeNVsKvtkYLMjfk=" crossorigin="anonymous"></script>
+    <script src="https://use.fontawesome.com/f0153b9f7b.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="bitcore-lib-dash.js"></script>
@@ -591,21 +592,30 @@
 
 <div class="container-fluid">
   <div class="row" id="header">
-      <div class="col-xs-12">
-          <h1>Dash Budget Proposal Generator</h1>
-          Generate budget proposal commands you can copy/paste into your Dash wallet to prepare a budget proposal and submit it to the network.
+      <div class="col-sm-2">
+        <img src="images/dash_logo.png" alt="dash governance tools">
+      </div>
+      <div class="col-sm-4">
+          <h2 class="header_title">Dash Budget Proposal Generator</h2>
+          <h5 class="header_description">Generate budget proposal commands you can copy/paste into your Dash wallet to prepare a budget proposal and submit it to the network.</h5>
+      </div>
+      <div class="col-sm-4 col-sm-offset-2 text-right">
+        <i class="fa fa-twitter" aria-hidden="true"></i>
+        <i class="fa fa-facebook" aria-hidden="true"></i>
+        <i class="fa fa-rss" aria-hidden="true"></i>
+        <img id="lang_box" src="images/lang.png" alt="english language">
       </div>
   </div>
 
   <div class="row">
-    <div class="col-xs-6 col-xs-offset-3">
+    <div class="col-sm-5 col-sm-offset-2 col-xs-12 col-xs-offset-0">
       <div class="proposalBlock createProposal">
         <div class="row">
           <div class="col-xs-12">
             <div class="row" id="createProposalHeader">
                 <div class="col-xs-12">
                     <h1 class="removeMargin">Create a Proposal</h1>
-                    <h5>Enter details for your proposal and click 'Create Proposal'.  This will generate a command you can run in your local wallet to prepare the proposal at a cost of 0.33 Dash</h5>
+                    <h5 class="header_description">Enter details for your proposal and click 'Create Proposal'.  This will generate a command you can run in your local wallet to prepare the proposal at a cost of 0.33 Dash</h5>
                 </div>
             </div>
 
