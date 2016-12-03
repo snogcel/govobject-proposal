@@ -1,0 +1,66 @@
+body {
+  background-image: url("../images/background.png");
+}
+
+textarea {
+  background-color:#fafafa !important;
+}
+
+.createProposal {
+
+}
+
+.proposalBlock {
+  padding: 7%;
+  background-color: #ffffff;
+  box-shadow: 0px 17px 24px 0px rgba(0, 0, 0, 0.16);
+}
+
+.removeMargin {
+  margin: 0;
+}
+
+.validationError {
+  background-color:#ffe6e6;
+}
+
+.walletCommands {
+
+}
+
+#header {
+  margin-top:2em;
+}
+
+/*#createProposalHeader {
+   margin-top:1em;
+}*/
+
+#createProposalForm {
+   margin-top:1em;
+}
+
+#payment_amount {
+  display: inline-block;
+  width: 20%;
+}
+
+#walletCommandsHeader {
+  margin-top:2em;
+}
+
+#walletCommandsPrepare {
+  margin-top:2em;
+}
+
+#walletCommandsTx {
+  margin-top:2em;
+}
+
+#walletCommandsProgress {
+  margin-top:2em;
+}
+
+#walletCommandsSubmit {
+  margin-top:2em;
+}
