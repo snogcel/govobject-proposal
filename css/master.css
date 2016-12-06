@@ -1,5 +1,6 @@
 body {
   background-image: url("../images/background.png");
+  font-family: 'Roboto', sans-serif;
 }
 
 textarea {
@@ -90,6 +91,10 @@ i.fa {
   }
 
   .header_description {
+    margin: 1% 0% 1% 0%;
+  }
+
+  #side_header_description {
     margin: 1% 0% 1% 0%;
   }
 }
