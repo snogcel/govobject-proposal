@@ -68,6 +68,32 @@ i.fa {
   width: 20%;
 }
 
+#side-header {
+  margin-top: 40%;
+}
+
+#side_header_description {
+  margin: 20% 0% 20% 0%;
+}
+
+#proposal_link {
+  font-weight: 600;
+}
+
+@media (max-width: 992px) {
+  #side-header {
+    margin-top: 4%;
+  }
+
+  .proposalBlock {
+    margin-top: 0%;
+  }
+
+  .header_description {
+    margin: 1% 0% 1% 0%;
+  }
+}
+
 #walletCommandsHeader {
   margin-top:2em;
 }
