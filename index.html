@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
     <title>Dash Governance Tools</title>
 
     <script src="bitcore-lib-dash.js"></script>
@@ -90,10 +91,10 @@
 
 <div class="container-fluid">
   <div class="row" id="header">
-      <div class="col-sm-2">
+      <div class="col-md-2">
         <img src="images/dash_logo.png" alt="dash governance tools">
       </div>
-      <div class="col-sm-4">
+      <div class="col-md-4">
           <h2 class="header_title">Dash Budget Proposal Generator</h2>
           <h5 class="header_description">Generate budget proposal commands you can copy/paste into your Dash wallet to prepare a budget proposal and submit it to the network.</h5>
       </div>
@@ -101,7 +102,7 @@
       <!--  -->
       <!-- Social icons commented out until we get proper links  -->
       <!--  -->
-      <!-- <div class="col-sm-4 col-sm-offset-2 text-right">
+      <!-- <div class="col-md-4 col-md-offset-2 text-right">
         <i class="fa fa-twitter" aria-hidden="true"></i>
         <i class="fa fa-facebook" aria-hidden="true"></i>
         <i class="fa fa-rss" aria-hidden="true"></i>
@@ -110,7 +111,8 @@
   </div>
 
   <div class="row">
-    <div class="col-sm-5 col-sm-offset-2 col-xs-12 col-xs-offset-0">
+
+    <div class="col-lg-7 col-md-7 col-md-offset-2 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0">
       <div class="proposalBlock createProposal">
         <div class="row">
           <div class="col-xs-12">
@@ -172,10 +174,10 @@
                       <input type="text" class="form-control" id="payment_amount" value="" placeholder="0">
                   </div>
                 </div>
-                <div class="col-xs-4 col-xs-offset-1">
-                  <div type="submit" class="btn btn-success" id="btnPrepare">Create Proposal</div>
-                  <div type="submit" class="btn btn-primary hidden" id="btnEdit">Edit Proposal</div>
-                  <div type="submit" class="btn btn-primary hidden" id="btnNew">New Proposal</div>
+                <div class="col-xs-4">
+                  <input type="submit" class="btn btn-success" id="btnPrepare" value="Create Proposal">
+                  <input type="submit" class="btn btn-primary hidden" id="btnEdit" value="Edit Proposal">
+                  <input type="submit" class="btn btn-primary hidden" id="btnNew" value="New Proposal">
                 </div>
               </div>
 
