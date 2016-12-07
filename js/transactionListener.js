@@ -1,6 +1,9 @@
 function transactionListener(proposal) {
 
     $('#feeTxid').on('input', function() {
+
+	$('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+
         if ($(this).val().length > 0) {
 
             var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
@@ -28,9 +31,11 @@ function transactionListener(proposal) {
                     $.getJSON(provider + 'insight-api-dash/tx/' + txidfield.val(), function(data) {
                         txidfield.attr("disabled", true);
                         $('.walletCommands#walletCommandsProgress').removeClass('hidden');
+
                         document.getElementById('step_three').click();
                         document.getElementsByClassName('progress-bar')[0].style.width = "75%";
                         document.getElementsByClassName('progress-bar')[0].innerText = "Awaiting network confirmations...";
+
                         var txid = data.tx;
                         var confirmations = data.confirmations;
                         var conftxt;
@@ -129,6 +134,7 @@ function transactionListener(proposal) {
                                         progbarval = 100;
                                         $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
                                         $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+
                                         document.getElementById('step_four').click();
                                         document.getElementsByClassName('progress-bar')[0].style.width = "100%";
                                         document.getElementsByClassName('progress-bar')[0].innerText = "Success";
