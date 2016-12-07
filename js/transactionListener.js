@@ -29,6 +29,8 @@ function transactionListener(proposal) {
                         txidfield.attr("disabled", true);
                         $('.walletCommands#walletCommandsProgress').removeClass('hidden');
                         document.getElementById('step_three').click();
+                        document.getElementsByClassName('progress-bar')[0].style.width = "75%";
+                        document.getElementsByClassName('progress-bar')[0].innerText = "Awaiting network confirmations...";
                         var txid = data.tx;
                         var confirmations = data.confirmations;
                         var conftxt;
@@ -128,6 +130,8 @@ function transactionListener(proposal) {
                                         $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
                                         $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
                                         document.getElementById('step_four').click();
+                                        document.getElementsByClassName('progress-bar')[0].style.width = "100%";
+                                        document.getElementsByClassName('progress-bar')[0].innerText = "Success";
                                     }
                                     $("#progressbar").progressbar({value: progbarval})
                                         .children('.ui-progressbar-value')

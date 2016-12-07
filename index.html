@@ -73,6 +73,8 @@
 
                 if (validProposal) {
                     document.getElementById('step_two').click();
+                    document.getElementsByClassName('progress-bar')[0].style.width = "50%";
+                    document.getElementsByClassName('progress-bar')[0].innerText = "Generated wallet commands";
 
                     proposal.walletCommands();
 
@@ -114,16 +116,18 @@
   </div>
 
   <div class="row">
-    <div class="col-xs-10 col-xs-offset-2">
-      <ul class="nav nav-tabs">
-        <li class="active"><a id="step_one" data-toggle="tab" href="#step1"></a>Initial proposal form</li>
-
-        <li><a id="step_two" data-toggle="tab" href="#step2"></a>Generated wallet commands</li>
-
-        <li><a id="step_three" data-toggle="tab" href="#step3"></a>Awaiting confirmations...</li>
-
-        <li><a id="step_four" data-toggle="tab" href="#step4"></a>Completed proposal code</li>
-
+    <div class="col-xs-12">
+      <div class="progress">
+        <div class="progress-bar" role="progressbar" aria-valuenow="25"
+        aria-valuemin="0" aria-valuemax="100" style="width:25%">
+          Create proposal
+        </div>
+      </div>
+      <ul class="nav nav-pills">
+        <li class="active"><a id="step_one" data-toggle="tab" href="#step1">Form</a></li>
+        <li><a id="step_two" data-toggle="tab" href="#step2">Commands</a></li>
+        <li><a id="step_three" data-toggle="tab" href="#step3">Progress</a></li>
+        <li><a id="step_four" data-toggle="tab" href="#step4">Complete</a></li>
       </ul>
     </div>
   </div>
@@ -208,8 +212,12 @@
                     </div>
                     <div class="col-xs-4">
                       <input type="submit" class="btn btn-success" id="btnPrepare" value="Create Proposal">
-                      <input type="submit" class="btn btn-primary hidden" id="btnEdit" value="Edit Proposal">
-                      <input type="submit" class="btn btn-primary hidden" id="btnNew" value="New Proposal">
+                      <div class="input-spacing">
+                        <input type="submit" class="btn btn-primary hidden" id="btnEdit" value="Edit Proposal">
+                      </div>
+                      <div class="input-spacing">
+                        <input type="submit" class="btn btn-primary hidden" id="btnNew" value="New Proposal">
+                      </div>
                     </div>
                   </div>
 
