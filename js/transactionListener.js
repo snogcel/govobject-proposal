@@ -28,6 +28,7 @@ function transactionListener(proposal) {
                     $.getJSON(provider + 'insight-api-dash/tx/' + txidfield.val(), function(data) {
                         txidfield.attr("disabled", true);
                         $('.walletCommands#walletCommandsProgress').removeClass('hidden');
+                        document.getElementById('step_three').click();
                         var txid = data.tx;
                         var confirmations = data.confirmations;
                         var conftxt;
@@ -126,6 +127,7 @@ function transactionListener(proposal) {
                                         progbarval = 100;
                                         $("#progresstxt").text("Your transaction has " + confirmations + " confirmations. You can now submit the proposal.");
                                         $('.walletCommands#walletCommandsSubmit').removeClass('hidden');
+                                        document.getElementById('step_four').click();
                                     }
                                     $("#progressbar").progressbar({value: progbarval})
                                         .children('.ui-progressbar-value')

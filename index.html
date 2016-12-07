@@ -72,6 +72,7 @@
                 var validProposal = proposal.validate();
 
                 if (validProposal) {
+                    document.getElementById('step_two').click();
 
                     proposal.walletCommands();
 
@@ -113,6 +114,17 @@
   </div>
 
   <div class="row">
+    <div class="col-xs-10 col-xs-offset-2">
+      <ul class="nav nav-tabs">
+        <li class="active"><a id="step_one" data-toggle="tab" href="#step1">Form</a></li>
+        <li><a id="step_two" data-toggle="tab" href="#step2">Commands</a></li>
+        <li><a id="step_three" data-toggle="tab" href="#step3">Progress</a></li>
+        <li><a id="step_four" data-toggle="tab" href="#step4">Success</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
     <div class="col-lg-2 col-md-2 col-md-push-8">
       <div class="row" id="side-header">
         <div class="col-xs-12">
@@ -126,172 +138,181 @@
     </div>
 
     <div class="col-lg-6 col-md-6 col-md-offset-2 col-md-pull-2 col-sm-12 col-sm-offset-0 col-xs-12 col-xs-offset-0">
-      <div class="proposalBlock createProposal">
-        <div class="row">
-          <div class="col-xs-12">
-            <div class="row" id="createProposalHeader">
-                <div class="col-xs-12">
-                    <h1 class="removeMargin">Create a Proposal</h1>
-                    <h5 class="header_description">Enter details for your proposal and click 'Create Proposal'.  This will generate a command you can run in your local wallet to prepare the proposal at a cost of 0.33 Dash</h5>
-                </div>
-            </div>
 
-            <div id="createProposalForm">
-              <div class="row">
-                <div class="col-xs-12">
-                  <div class="form-group">
-                      <label for="name">Proposal Name:</label>
-                      <input type="text" class="form-control" id="name" value="" placeholder="proposal-name">
-                  </div>
-                  <div class="form-group">
-                      <label for="url">Proposal Description URL:</label>
-                      <input type="text" class="form-control" id="url" value="" placeholder="https://www.dashcentral.org/p/proposal-name">
-                  </div>
+      <div class="tab-content">
+        <div id="step1" class="tab-pane fade in active">
+          <div class="proposalBlock createProposal">
+            <div class="row">
+              <div class="col-xs-12">
+                <div class="row" id="createProposalHeader">
+                    <div class="col-xs-12">
+                        <h1 class="removeMargin">Create a Proposal</h1>
+                        <h5 class="header_description">Enter details for your proposal and click 'Create Proposal'.  This will generate a command you can run in your local wallet to prepare the proposal at a cost of 0.33 Dash</h5>
+                    </div>
                 </div>
-              </div>
 
-              <div class="row">
-                <div class="col-xs-3">
-                  <div class="form-group">
-                      <label for="start_epoch">Start Date:</label>
-                      <select name="start_epoch" class="form-control" id="start_epoch"></select>
+                <div id="createProposalForm">
+                  <div class="row">
+                    <div class="col-xs-12">
+                      <div class="form-group">
+                          <label for="name">Proposal Name:</label>
+                          <input type="text" class="form-control" id="name" value="" placeholder="proposal-name">
+                      </div>
+                      <div class="form-group">
+                          <label for="url">Proposal Description URL:</label>
+                          <input type="text" class="form-control" id="url" value="" placeholder="https://www.dashcentral.org/p/proposal-name">
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div class="col-xs-3">
+
+                  <div class="row">
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                          <label for="start_epoch">Start Date:</label>
+                          <select name="start_epoch" class="form-control" id="start_epoch"></select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <!--  -->
+                      <!--  -->
+                      <!-- ATTENTION: COMMENT FOR JON -->
+                      <!--  -->
+                      <!--  -->
+                      <!-- The following form group is a placeholder for proposal end time. Please change to the correct id. -->
+                      <div class="form-group">
+                          <label for="start_epoch">Number of Payments:</label>
+                          <select name="start_epoch" class="form-control" id="end_epoch"></select>
+                      </div>
+                      <!--  -->
+                      <!--  -->
+                      <!--  -->
+                    </div>
+                    <div class="col-xs-6">
+                      <div class="form-group">
+                          <label for="payment_address">Payment Address:</label>
+                          <input type="text" class="form-control" id="payment_address" value="" placeholder="">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-xs-7">
+                      <div class="form-group">
+                          <label for="payment_amount">Monthly Payment Amount in Dash:</label>
+                          <input type="text" class="form-control" id="payment_amount" value="" placeholder="0">
+                      </div>
+                    </div>
+                    <div class="col-xs-4">
+                      <input type="submit" class="btn btn-success" id="btnPrepare" value="Create Proposal">
+                      <input type="submit" class="btn btn-primary hidden" id="btnEdit" value="Edit Proposal">
+                      <input type="submit" class="btn btn-primary hidden" id="btnNew" value="New Proposal">
+                    </div>
+                  </div>
+
+                  <div class="form-group" style="display:none;">
+                      <label for="type">type:</label>
+                      <input type="text" class="form-control" id="type" value="1" placeholder="1">
+                  </div>
+
+                  <div class="form-group" style="display:none;">
+                      <label for="parentHash">parent-hash:</label>
+                      <input type="text" class="form-control" id="parentHash" value="0" placeholder="0">
+                  </div>
+
+                  <div class="form-group" style="display:none;">
+                      <label for="revision">revision:</label>
+                      <input type="text" class="form-control" id="revision" value="1" placeholder="1">
+                  </div>
+
+                  <div class="form-group" style="display:none;">
+                      <label for="time">Creation Time:</label>
+                      <input type="text" class="form-control" id="time" value="" placeholder="">
+                  </div>
+
+                  <!--  -->
                   <!--  -->
                   <!--  -->
                   <!-- ATTENTION: COMMENT FOR JON -->
-                  <!--  -->
-                  <!--  -->
-                  <!-- The following form group is a placeholder for proposal end time. Please change to the correct id. -->
-                  <div class="form-group">
-                      <label for="start_epoch">Number of Payments:</label>
-                      <select name="start_epoch" class="form-control" id="end_epoch"></select>
-                  </div>
-                  <!--  -->
-                  <!--  -->
-                  <!--  -->
-                </div>
-                <div class="col-xs-6">
-                  <div class="form-group">
-                      <label for="payment_address">Payment Address:</label>
-                      <input type="text" class="form-control" id="payment_address" value="" placeholder="">
-                  </div>
+                  <!-- The following form group is commented out because it's not a part of the design mock. Staying here for safe keeping just in case still needed. -->
+
+                  <!-- <div class="form-group">
+                      <label for="end_epoch">Choose payment cycle:</label>
+                      <select name="end_epoch" class="form-control" id="end_epoch"></select>
+                  </div> -->
                 </div>
               </div>
-
-              <div class="row">
-                <div class="col-xs-7">
-                  <div class="form-group">
-                      <label for="payment_amount">Monthly Payment Amount in Dash:</label>
-                      <input type="text" class="form-control" id="payment_amount" value="" placeholder="0">
-                  </div>
-                </div>
-                <div class="col-xs-4">
-                  <input type="submit" class="btn btn-success" id="btnPrepare" value="Create Proposal">
-                  <input type="submit" class="btn btn-primary hidden" id="btnEdit" value="Edit Proposal">
-                  <input type="submit" class="btn btn-primary hidden" id="btnNew" value="New Proposal">
-                </div>
-              </div>
-
-              <div class="form-group" style="display:none;">
-                  <label for="type">type:</label>
-                  <input type="text" class="form-control" id="type" value="1" placeholder="1">
-              </div>
-
-              <div class="form-group" style="display:none;">
-                  <label for="parentHash">parent-hash:</label>
-                  <input type="text" class="form-control" id="parentHash" value="0" placeholder="0">
-              </div>
-
-              <div class="form-group" style="display:none;">
-                  <label for="revision">revision:</label>
-                  <input type="text" class="form-control" id="revision" value="1" placeholder="1">
-              </div>
-
-              <div class="form-group" style="display:none;">
-                  <label for="time">Creation Time:</label>
-                  <input type="text" class="form-control" id="time" value="" placeholder="">
-              </div>
-
-              <!--  -->
-              <!--  -->
-              <!--  -->
-              <!-- ATTENTION: COMMENT FOR JON -->
-              <!-- The following form group is commented out because it's not a part of the design mock. Staying here for safe keeping just in case still needed. -->
-
-              <!-- <div class="form-group">
-                  <label for="end_epoch">Choose payment cycle:</label>
-                  <select name="end_epoch" class="form-control" id="end_epoch"></select>
-              </div> -->
             </div>
           </div>
         </div>
+        <div id="step2" class="tab-pane fade">
+          <div class="row walletCommands hidden" id="walletCommandsHeader">
+              <div class="col-xs-12">
+                  <h2>Wallet Commands</h2>
+              </div>
+
+          </div>
+
+          <div class="row walletCommands hidden" id="walletCommandsPrepare">
+
+              <div class="col-xs-12">
+
+                      <div class="form-group">
+                          <label for="prepareProposal">Prepare-Proposal Command:</label>
+                          <div>Paste this proposal command into your Dash wallet console to spend a Fee transaction of 0.33 DASH.</div>
+                          <textarea readonly class="form-control" id="prepareProposal" rows="4" placeholder=""></textarea>
+                      </div>
+
+              </div>
+
+          </div>
+
+          <div class="row walletCommands hidden" id="walletCommandsTx">
+
+              <div class="col-xs-12">
+
+                  <div class="form-group">
+                      <label for="feeTxid">Fee Transaction ID:</label>
+                      <div>Paste the transaction ID returned by the wallet below to generate the final submit command.</div>
+                      <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
+                  </div>
+
+              </div>
+
+          </div>
+
+        </div>
+        <div id="step3" class="tab-pane fade">
+
+          <div class="row walletCommands hidden" id="walletCommandsProgress">
+
+              <div class="col-xs-12">
+
+                  <div class="form-group">
+                      <label for="feeTxid">Fee Transaction Progress:</label>
+                      <div id="progresstxt">We'll wait for 6 confirmations. Waiting for new blocks to confirm...</div>
+                      <div id="progressbar"></div>
+                  </div>
+
+              </div>
+
+          </div>
+        </div>
+        <div id="step4" class="tab-pane fade">
+          <div class="row walletCommands hidden" id="walletCommandsSubmit">
+
+              <div class="col-xs-12">
+
+                  <div class="form-group">
+                      <label for="submitProposal">Submit Proposal Command:</label>
+                      <div>Paste the Fee TX id to generate the proposal submit command.  This is the final step and can be completed after 6 confirmations on the fee tx.</div>
+                      <textarea readonly class="form-control" id="submitProposal" rows="4" placeholder=""></textarea>
+                  </div>
+
+              </div>
+
+          </div>
+        </div>
       </div>
-
-
-        <div class="row walletCommands hidden" id="walletCommandsHeader">
-            <div class="col-xs-12">
-                <h2>Wallet Commands</h2>
-            </div>
-
-        </div>
-
-        <div class="row walletCommands hidden" id="walletCommandsPrepare">
-
-            <div class="col-xs-12">
-
-                    <div class="form-group">
-                        <label for="prepareProposal">Prepare-Proposal Command:</label>
-                        <div>Paste this proposal command into your Dash wallet console to spend a Fee transaction of 0.33 DASH.</div>
-                        <textarea readonly class="form-control" id="prepareProposal" rows="4" placeholder=""></textarea>
-                    </div>
-
-            </div>
-
-        </div>
-
-        <div class="row walletCommands hidden" id="walletCommandsTx">
-
-            <div class="col-xs-12">
-
-                <div class="form-group">
-                    <label for="feeTxid">Fee Transaction ID:</label>
-                    <div>Paste the transaction ID returned by the wallet below to generate the final submit command.</div>
-                    <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="row walletCommands hidden" id="walletCommandsProgress">
-
-            <div class="col-xs-12">
-
-                <div class="form-group">
-                    <label for="feeTxid">Fee Transaction Progress:</label>
-                    <div id="progresstxt">We'll wait for 6 confirmations. Waiting for new blocks to confirm...</div>
-                    <div id="progressbar"></div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="row walletCommands hidden" id="walletCommandsSubmit">
-
-            <div class="col-xs-12">
-
-                <div class="form-group">
-                    <label for="submitProposal">Submit Proposal Command:</label>
-                    <div>Paste the Fee TX id to generate the proposal submit command.  This is the final step and can be completed after 6 confirmations on the fee tx.</div>
-                    <textarea readonly class="form-control" id="submitProposal" rows="4" placeholder=""></textarea>
-                </div>
-
-            </div>
-
-        </div>
 
     </div>
 
