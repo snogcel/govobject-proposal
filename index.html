@@ -19,22 +19,30 @@
     <link rel="stylesheet" href="css/master.css">
     <script src="js/proposalGenerator.js"></script>
     <script src="js/paymentCycle.js"></script>
+    <script src="js/txListener.js"></script>
     <script src="js/transactionListener.js"></script>
     <script src="js/formHandler.js"></script>
-
 
     <script src="https://dev-test.dash.org/socket.io/socket.io.js"></script>
 
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
-        var provider = 'https://dev-test.dash.org:3001/';
+        var provider = 'https://dev-test.dash.org/';
+
+        var socket = io(provider);
+
+        socket.on('connect', function() {
+            socket.emit('subscribe', 'inv');
+            console.log("socket.io initialized...");
+        });
 
         $(document).ready(function() {
             var gov = new Bitcore.GovObject.Proposal();
             gov.network = 'testnet';
 
             var paymentCycle = new PaymentCycle(gov);
+
             paymentCycle.updateDropdowns(); // update dropdown menus based on network and current time
 
             $("#time").val(Math.floor((new Date).getTime() / 1000));
@@ -71,8 +79,6 @@
 
                     proposal.walletCommands();
 
-                    transactionListener(proposal);
-
                     $('#btnEdit').click(function() {
                         proposal.createProposal();
                     });
@@ -82,6 +88,25 @@
                     });
                 }
             });
+
+            $('#feeTxid').on('input', function() {
+
+                var transaction = $(this).val();
+                var txListener = new TXListener(socket, provider, transaction);
+
+                // check if tx exists in insight
+                txListener.getTx(function(err, res) {
+                    if(err) console.log(err);
+                    if(res) {
+                        console.log(res);
+                        txListener.blockheight = res.blockheight;
+                        txListener.confirmations = res.confirmations;
+                        txListener.initSocket();
+                    }
+                });
+
+            });
+
         });
     </script>
 
@@ -232,7 +257,7 @@
 
         </div>
 
-        <div class="row walletCommands hidden" id="walletCommandsTx">
+        <div class="row walletCommands" id="walletCommandsTx">
 
             <div class="col-xs-12">
 
@@ -246,7 +271,7 @@
 
         </div>
 
-        <div class="row walletCommands hidden" id="walletCommandsProgress">
+        <div class="row walletCommands" id="walletCommandsProgress">
 
             <div class="col-xs-12">
 
