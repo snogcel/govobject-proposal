@@ -9,7 +9,7 @@ function TXListener(socket, provider, transaction) {
 
 }
 
-TXListener.prototype.initSocket = function() {
+TXListener.prototype.initSocket = function(cb) {
     var self = this;
     var socket = this.socket;
 
@@ -20,6 +20,9 @@ TXListener.prototype.initSocket = function() {
 
             if (err) console.log("error fetching block: " + data);
             self.confirmations = (res.height - self.blockheight) + 1; // compare blockHeight against transaction blockHeight
+
+            if (self.confirmations >= 6) cb();
+            $("#progressbar").progressbar({value: ((100 / 6) * self.confirmations)});
 
             console.log('confirmations: ' + self.confirmations);
 

@@ -23,7 +23,8 @@
     <link rel="stylesheet" href="css/master.css">
     <script src="js/proposalGenerator.js"></script>
     <script src="js/paymentCycle.js"></script>
-    <script src="js/transactionListener.js"></script>
+    <!-- <script src="js/transactionListener.js"></script> -->
+    <script src="js/txListener.js"></script>
     <script src="js/formHandler.js"></script>
 
     <script src="https://dev-test.dash.org/socket.io/socket.io.js"></script>
@@ -85,7 +86,7 @@
 
                     proposal.walletCommands();
 
-                    transactionListener(proposal);
+                    // transactionListener(proposal);
 
                     $('#btnEdit').click(function() {
                         proposal.createProposal();
@@ -107,9 +108,24 @@
                     if(err) console.log(err);
                     if(res) {
                         console.log(res);
+
+                        // transaction exists, proceed to step three
+                        document.getElementById('step_three').click();
+                        document.getElementsByClassName('progress-bar')[0].style.width = "75%";
+                        document.getElementsByClassName('progress-bar')[0].innerText = "Awaiting transaction confirmation";
+
+                        $('#walletCommandsProgress').removeClass('hidden'); // probably a better way to do this....
+                        $("#progressbar").progressbar({value: 0}); // TXListener will bump this along as confirmations occur
+
                         txListener.blockheight = res.blockheight;
                         txListener.confirmations = res.confirmations;
-                        txListener.initSocket();
+
+                        txListener.initSocket(function() {
+                            document.getElementById('step_four').click();
+                            document.getElementsByClassName('progress-bar')[0].style.width = "100%";
+                            document.getElementsByClassName('progress-bar')[0].innerText = "Proposal ready for submission";
+                        }); // callback issued after tx confirmations >= 6
+
                     }
                 });
             });
