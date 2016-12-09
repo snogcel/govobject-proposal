@@ -100,6 +100,8 @@
 
             $('#feeTxid').on('input', function() {
 
+                var proposal = new ProposalGenerator(gov);
+
                 var transaction = $(this).val();
                 var txListener = new TXListener(socket, provider, transaction);
 
@@ -121,9 +123,15 @@
                         txListener.confirmations = res.confirmations;
 
                         txListener.initSocket(function() {
+                            console.log("callback called, step 4");
+                            $('#walletCommandsSubmit').removeClass('hidden');
                             document.getElementById('step_four').click();
                             document.getElementsByClassName('progress-bar')[0].style.width = "100%";
                             document.getElementsByClassName('progress-bar')[0].innerText = "Proposal ready for submission";
+
+                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
+                            console.log(submitCommand);
+                            $('textarea#submitProposal').val(submitCommand);
                         }); // callback issued after tx confirmations >= 6
 
                     }
