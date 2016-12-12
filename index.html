@@ -123,7 +123,6 @@
                         txListener.confirmations = res.confirmations;
 
                         txListener.initSocket(function() {
-                            console.log("callback called, step 4");
                             $('#walletCommandsSubmit').removeClass('hidden');
                             document.getElementById('step_four').click();
                             document.getElementsByClassName('progress-bar')[0].style.width = "100%";
