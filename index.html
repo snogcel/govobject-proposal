@@ -127,8 +127,8 @@
                             document.getElementById('step_four').click();
                             document.getElementsByClassName('progress-bar')[0].style.width = "100%";
                             document.getElementsByClassName('progress-bar')[0].innerText = "Proposal ready for submission";
-
-                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $(this).val();
+                            console.log($('#feeTxid').val());
+                            var submitCommand = "gobject submit " + $('#parentHash').val() + " " + $('#revision').val() + " " + $('#time').val() + " " + proposal.gov.serialize() + " " + $('#feeTxid').val();
                             console.log(submitCommand);
                             $('textarea#submitProposal').val(submitCommand);
                         }); // callback issued after tx confirmations >= 6
