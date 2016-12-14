@@ -32,22 +32,35 @@
     <script type="text/javascript">
 
         var Bitcore = require('bitcore-lib-dash');
-        var provider = 'https://dev-test.dash.org/';
 
-        var socket = io(provider);
+        var socket;
 
-        socket.on('connect', function() {
-            socket.emit('subscribe', 'inv');
-            console.log("socket.io initialized...");
-        });
+        var mainnetProvider = 'https://dev-test.dash.org/';
+        var testnetProvider = 'https://dev-test.dash.org/';
+
+        var init = function(network, provider) {
+            var gov = new Bitcore.GovObject.Proposal();
+            gov.network = network || 'testnet';
+
+            var paymentCycle = new PaymentCycle(gov, provider);
+            paymentCycle.updateDropdowns();
+
+            socket = io(provider);
+
+            socket.on('connect', function() {
+                socket.emit('subscribe', 'inv');
+                console.log("socket.io initialized...");
+            });
+
+            return gov;
+        };
 
         $(document).ready(function() {
-            var gov = new Bitcore.GovObject.Proposal();
-            gov.network = 'testnet';
 
-            var paymentCycle = new PaymentCycle(gov);
+            var gov = init('testnet', testnetProvider); // default network;
 
-            paymentCycle.updateDropdowns(); // update dropdown menus based on network and current time
+            $('#mainnet').change(function() { gov = init('mainnet', mainnetProvider); });
+            $('#testnet').change(function() { gov = init('testnet', testnetProvider); });
 
             $("#time").val(Math.floor((new Date).getTime() / 1000));
 
@@ -148,6 +161,15 @@
         <img src="images/dash_logo.png" alt="dash governance tools">
       </div>
       <div class="col-md-4">
+
+          <div class="btn-group" data-toggle="buttons">
+              <label class="btn btn-primary">
+                  <input type="radio" name="options" id="mainnet" autocomplete="off"> Mainnet
+              </label>
+              <label class="btn btn-primary active">
+                  <input type="radio" name="options" id="testnet" autocomplete="off" checked> Testnet
+              </label>
+          </div>
 
       </div>
       <!--  -->

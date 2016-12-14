@@ -4,10 +4,11 @@
  * @param gov
  * @constructor
  */
-function PaymentCycle(gov) {
+function PaymentCycle(gov, provider) {
     var self = this;
 
     this.network = gov.network;
+    this.provider = provider;
     this.paymentCycle = 16616; // mainnet
     this.budgetCycles = 24;
 
@@ -152,7 +153,7 @@ PaymentCycle.prototype.updateDropdowns = function() {
 };
 
 PaymentCycle.prototype.getInfo = function(cb) {
-    $.getJSON(provider + "insight-api-dash/status?q=getinfo", function( data ) {
+    $.getJSON(this.provider + "insight-api-dash/status?q=getinfo", function( data ) {
         cb(null, data);
     });
 };
