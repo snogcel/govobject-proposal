@@ -34,6 +34,7 @@
         var Bitcore = require('bitcore-lib-dash');
 
         var socket;
+        var paymentCycle;
 
         var mainnetProvider = 'https://dev-test.dash.org/';
         var testnetProvider = 'https://dev-test.dash.org/';
@@ -42,7 +43,7 @@
             var gov = new Bitcore.GovObject.Proposal();
             gov.network = network || 'testnet';
 
-            var paymentCycle = new PaymentCycle(gov, provider);
+            paymentCycle = new PaymentCycle(gov, provider);
             paymentCycle.updateDropdowns();
 
             socket = io(provider);
@@ -116,7 +117,7 @@
                 var proposal = new ProposalGenerator(gov);
 
                 var transaction = $(this).val();
-                var txListener = new TXListener(socket, provider, transaction);
+                var txListener = new TXListener(socket, paymentCycle.provider, transaction);
 
                 // check if tx exists in insight
                 txListener.getTx(function(err, res) {
