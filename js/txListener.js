@@ -12,6 +12,7 @@ function TXListener(socket, provider, transaction) {
 TXListener.prototype.initSocket = function(cb) {
     var self = this;
     var socket = this.socket;
+    var confirmations = 0;
 
     socket.on('block', function(data) {
         console.log('block: '+ data);
@@ -19,12 +20,15 @@ TXListener.prototype.initSocket = function(cb) {
         self.getBlock(data, function(err, res) {
 
             if (err) console.log("error fetching block: " + data);
-            self.confirmations = (res.height - self.blockheight) + 1; // compare blockHeight against transaction blockHeight
+            //self.confirmations = (res.height - self.blockheight) + 1; // compare blockHeight against transaction blockHeight
+            confirmations++;
 
-            if (self.confirmations >= 6) cb();
-            $("#progressbar").progressbar({value: ((100 / 6) * self.confirmations)});
+            if (confirmations >= 6) {
+              cb();
+            };
+            $("#progressbar").progressbar({value: ((100 / 6) * confirmations)});
 
-            console.log('confirmations: ' + self.confirmations);
+            console.log('confirmations: ' + confirmations);
 
         });
     });
@@ -41,6 +45,7 @@ TXListener.prototype.getTx = function(cb) {
             format: "json"
         }
     };
+    console.log(opts);
 
     this._fetch(opts, cb);
 };
