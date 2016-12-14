@@ -102,6 +102,7 @@
                     document.getElementById('step_two').click();
                     document.getElementsByClassName('progress-bar')[0].style.width = "50%";
                     document.getElementsByClassName('progress-bar')[0].innerText = "Generated wallet commands";
+                    $('#network_toggle').addClass('hidden');
 
                     proposal.walletCommands();
 
@@ -113,6 +114,7 @@
 
                     $('#btnNew').click(function() {
                         proposal.resetProposal();
+                        $('#network_toggle').removeClass('hidden');
                     });
                 }
             });
@@ -178,7 +180,7 @@
       </div>
       <div class="col-md-4">
 
-          <div class="btn-group" data-toggle="buttons">
+          <div id="network_toggle" class="btn-group" data-toggle="buttons">
               <label class="btn btn-primary">
                   <input type="radio" name="options" id="mainnet" autocomplete="off"> Mainnet
               </label>
