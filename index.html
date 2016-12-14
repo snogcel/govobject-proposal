@@ -53,6 +53,11 @@
                 console.log("socket.io initialized...");
             });
 
+            socket.on('disconnect', function() {
+              console.log('connection lost');
+              alert('We sorry; connection lost.');
+            });
+
             return gov;
         };
 
