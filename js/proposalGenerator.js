@@ -115,5 +115,15 @@ ProposalGenerator.prototype.resetProposal = function() {
     $('.createProposal input').each(function() {
         $(this).val('');
     });
-    setFormEditable(true);
+    $("#btnEdit").val('Edit Proposal');
+    $("#btnNew").val('New Proposal');
+    $("#btnPrepare").val('Create Proposal');
+    setFormEditable(false);
+    $('.walletCommands#walletCommandsHeader').addClass('hidden');
+    $('.walletCommands#walletCommandsPrepare').addClass('hidden');
+    $('.walletCommands#walletCommandsTx').addClass('hidden');
+    $('.walletCommands#walletCommandsProgress').addClass('hidden');
+    $('.walletCommands#walletCommandsSubmit').addClass('hidden');
+
+    this._mode = 'proposal';
 };

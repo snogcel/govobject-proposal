@@ -9,7 +9,9 @@ function setFormEditable(edit) {
     if (edit === true) {
         $('#btnPrepare').addClass('hidden');
         $('#btnEdit').removeClass('hidden');
+        $('#btnEdit').removeAttr('disabled');
         $('#btnNew').removeClass('hidden');
+        $('#btnNew').removeAttr('disabled');
     } else {
         $('#btnPrepare').removeClass('hidden');
         $('#btnEdit').addClass('hidden');
