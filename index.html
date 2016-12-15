@@ -53,6 +53,11 @@
                 console.log("socket.io initialized...");
             });
 
+            socket.on('disconnect', function() {
+              console.log('connection lost');
+              alert('We sorry; connection lost.');
+            });
+
             return gov;
         };
 
@@ -97,6 +102,7 @@
                     document.getElementById('step_two').click();
                     document.getElementsByClassName('progress-bar')[0].style.width = "50%";
                     document.getElementsByClassName('progress-bar')[0].innerText = "Generated wallet commands";
+                    $('#network_toggle').addClass('hidden');
 
                     proposal.walletCommands();
 
@@ -108,6 +114,7 @@
 
                     $('#btnNew').click(function() {
                         proposal.resetProposal();
+                        $('#network_toggle').removeClass('hidden');
                     });
                 }
             });
@@ -121,9 +128,19 @@
 
                 // check if tx exists in insight
                 txListener.getTx(function(err, res) {
-                    if(err) console.log(err);
+                    if(err) {
+                      console.log("Error:", err);
+                      if(err == 404) {
+                        $('#feeTxid').addClass('validationError');
+                        $('#feeTxid').val('Transaction ID not found');
+                      } else if (err == 400) {
+                        $('#feeTxid').addClass('validationError');
+                        $('#feeTxid').val('Please paste a valid transaction ID');
+                      }
+
+                    }
                     if(res) {
-                        console.log(res);
+                        console.log("Response:", res);
 
                         // transaction exists, proceed to step three
                         document.getElementById('step_three').click();
@@ -163,7 +180,7 @@
       </div>
       <div class="col-md-4">
 
-          <div class="btn-group" data-toggle="buttons">
+          <div id="network_toggle" class="btn-group" data-toggle="buttons">
               <label class="btn btn-primary">
                   <input type="radio" name="options" id="mainnet" autocomplete="off"> Mainnet
               </label>
@@ -327,71 +344,75 @@
           </div>
         </div>
         <div id="step2" class="tab-pane fade">
-          <div class="row walletCommands hidden" id="walletCommandsHeader">
-              <div class="col-xs-12">
-                  <h2>Wallet Commands</h2>
-              </div>
+          <div class="proposalBlock">
+            <div class="row walletCommands hidden" id="walletCommandsHeader">
+                <div class="col-xs-12">
+                    <h2>Wallet Commands</h2>
+                </div>
 
+            </div>
+
+            <div class="row walletCommands hidden" id="walletCommandsPrepare">
+
+                <div class="col-xs-12">
+
+                        <div class="form-group">
+                            <label for="prepareProposal">Prepare-Proposal Command:</label>
+                            <div>Paste this proposal command into your Dash wallet console to spend a Fee transaction of 0.33 DASH.</div>
+                            <textarea readonly class="form-control" id="prepareProposal" rows="4" placeholder=""></textarea>
+                        </div>
+
+                </div>
+
+            </div>
+
+            <div class="row walletCommands hidden" id="walletCommandsTx">
+
+                <div class="col-xs-12">
+
+                    <div class="form-group">
+                        <label for="feeTxid">Fee Transaction ID:</label>
+                        <div>Paste the transaction ID returned by the wallet below to generate the final submit command.</div>
+                        <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
+                    </div>
+
+                </div>
+
+            </div>
           </div>
-
-          <div class="row walletCommands hidden" id="walletCommandsPrepare">
-
-              <div class="col-xs-12">
-
-                      <div class="form-group">
-                          <label for="prepareProposal">Prepare-Proposal Command:</label>
-                          <div>Paste this proposal command into your Dash wallet console to spend a Fee transaction of 0.33 DASH.</div>
-                          <textarea readonly class="form-control" id="prepareProposal" rows="4" placeholder=""></textarea>
-                      </div>
-
-              </div>
-
-          </div>
-
-          <div class="row walletCommands hidden" id="walletCommandsTx">
-
-              <div class="col-xs-12">
-
-                  <div class="form-group">
-                      <label for="feeTxid">Fee Transaction ID:</label>
-                      <div>Paste the transaction ID returned by the wallet below to generate the final submit command.</div>
-                      <input type="text" class="form-control" id="feeTxid" value="" placeholder="<fee-txid>">
-                  </div>
-
-              </div>
-
-          </div>
-
         </div>
         <div id="step3" class="tab-pane fade">
+          <div class="proposalBlock">
+            <div class="row walletCommands hidden" id="walletCommandsProgress">
 
-          <div class="row walletCommands hidden" id="walletCommandsProgress">
+                <div class="col-xs-12">
 
-              <div class="col-xs-12">
+                    <div class="form-group">
+                        <label for="feeTxid">Fee Transaction Progress:</label>
+                        <div id="progresstxt">We'll wait for 6 confirmations. Waiting for new blocks to confirm...</div>
+                        <div id="progressbar"></div>
+                    </div>
 
-                  <div class="form-group">
-                      <label for="feeTxid">Fee Transaction Progress:</label>
-                      <div id="progresstxt">We'll wait for 6 confirmations. Waiting for new blocks to confirm...</div>
-                      <div id="progressbar"></div>
-                  </div>
+                </div>
 
-              </div>
-
+            </div>
           </div>
         </div>
         <div id="step4" class="tab-pane fade">
-          <div class="row walletCommands hidden" id="walletCommandsSubmit">
+          <div class="proposalBlock">
+            <div class="row walletCommands hidden" id="walletCommandsSubmit">
 
-              <div class="col-xs-12">
+                <div class="col-xs-12">
 
-                  <div class="form-group">
-                      <label for="submitProposal">Submit Proposal Command:</label>
-                      <div>Paste the Fee TX id to generate the proposal submit command.  This is the final step and can be completed after 6 confirmations on the fee tx.</div>
-                      <textarea readonly class="form-control" id="submitProposal" rows="4" placeholder=""></textarea>
-                  </div>
+                    <div class="form-group">
+                        <label for="submitProposal">Submit Proposal Command:</label>
+                        <div>Paste the Fee TX id to generate the proposal submit command.  This is the final step and can be completed after 6 confirmations on the fee tx.</div>
+                        <textarea readonly class="form-control" id="submitProposal" rows="4" placeholder=""></textarea>
+                    </div>
 
-              </div>
+                </div>
 
+            </div>
           </div>
         </div>
       </div>

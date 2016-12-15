@@ -45,7 +45,6 @@ TXListener.prototype.getTx = function(cb) {
             format: "json"
         }
     };
-    console.log(opts);
 
     this._fetch(opts, cb);
 };
@@ -80,7 +79,8 @@ TXListener.prototype._fetch = function(opts,cb) {
                 cb(null, data);
             },
             error: function (jqXHR, status, error) {
-                var err = eval("(" + jqXHR.responseText + ")");
+                var err = jqXHR.status;
+                //var err = eval("(" + jqXHR.responseText + ")");
                 cb(err, null);
             }
         });
