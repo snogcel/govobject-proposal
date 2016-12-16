@@ -12,10 +12,16 @@ function PaymentCycle(gov, provider) {
     this.paymentCycle = 16616; // mainnet
     this.budgetCycles = 24;
 
+    this.selectedStartIndex = 0;
+    this.selectedPeriods = 1;
+
     if (this.network == 'testnet') this.paymentCycle = 24;
     if (this.network == 'testnet') this.budgetCycles = 96;
 
     this.blockHeight = null;
+
+    this.startDate = [];
+    this.endDate = [];
 
     this.Messages = {
         paymentCycle: {
@@ -89,31 +95,28 @@ PaymentCycle.prototype.updateDropdowns = function() {
 
     var blockHeight = this.blockHeight;
 
-    var startDate = [];
-    var endDate = [];
-
     for (i = 0; i < this.budgetCycles + 1; i++) {
 
         var superblock = this.getNextSuperblock(blockHeight);
         var timestamp = this.getBlockTimestamp(superblock);
 
         var label = new Date(timestamp).toLocaleDateString();
-        if (this.network == 'testnet') label = new Date(timestamp).toLocaleString();
+        if (this.network == 'testnet') label += " @ " + new Date(timestamp).toLocaleTimeString();
 
         var superblockDate = {
             superblock: superblock,
             timestamp: timestamp,
             label: label
         };
-        startDate.push(superblockDate);
-        endDate.push(superblockDate);
+        this.startDate.push(superblockDate);
+        this.endDate.push(superblockDate);
 
         blockHeight = superblock;
 
     }
 
-    endDate.shift(); // remove first element of endDate
-    startDate.pop(); // remove last element of startDate to keep length even
+    this.endDate.shift(); // remove first element of endDate
+    this.startDate.pop(); // remove last element of startDate to keep length even
 
     var now = Math.floor(Date.now());
 
@@ -125,7 +128,7 @@ PaymentCycle.prototype.updateDropdowns = function() {
 
     var start_epoch = $("#start_epoch");
     start_epoch.find('option').remove();
-    $.each(startDate, function(index) {
+    $.each(this.startDate, function(index) {
 
         var eta = self.getTimeDifference(opts, now, this.timestamp);
         var time = this.timestamp - now;
@@ -134,21 +137,32 @@ PaymentCycle.prototype.updateDropdowns = function() {
 
     });
 
+    self.updateEndEpoch();
 
-    opts.precision = null; // 0 units of precision for eta formatting
+};
+
+PaymentCycle.prototype.updateEndEpoch = function() {
+    var self = this;
+
+    var opts = {
+        precision: null
+    }; // 0 units of precision for eta formatting
 
     var end_epoch = $("#end_epoch");
     end_epoch.find('option').remove();
-    $.each(endDate, function(index) {
+    $.each(this.endDate, function(index) {
 
-        var eta = self.getTimeDifference(opts, startDate[0].timestamp, this.timestamp);
-        var time = this.timestamp - startDate[0].timestamp;
+        if(index >= self.selectedStartIndex) {
 
-        var option = $("<option />").val((Math.floor(this.timestamp / 1000))).text(eta + " (" + this.label + ")").attr('data-index', index).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
-        end_epoch.append(option);
+            var eta = self.getTimeDifference(opts, self.startDate[self.selectedStartIndex].timestamp, this.timestamp);
+            var time = this.timestamp - self.startDate[self.selectedStartIndex].timestamp;
+
+            var option = $("<option />").val((Math.floor(this.timestamp / 1000))).text(this.label).attr('data-index', index).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
+            end_epoch.append(option);
+
+        }
 
     });
-
 
 };
 
