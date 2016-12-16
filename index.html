@@ -61,6 +61,15 @@
             return gov;
         };
 
+        var updateTotal = function() {
+            paymentCycle.selectedPeriods = $('#end_epoch').find(':selected').data('index');
+
+            var payment_amount = parseInt($('#payment_amount').val());
+            var periods = parseInt((paymentCycle.selectedPeriods+1)-paymentCycle.selectedStartIndex);
+
+            $('#total_amount').text(payment_amount * periods);
+        };
+
         $(document).ready(function() {
 
             var gov = init('testnet', testnetProvider); // default network;
@@ -71,24 +80,16 @@
             $('#start_epoch').change(function() {
                 paymentCycle.selectedStartIndex = $('#start_epoch').find(':selected').data('index');
                 paymentCycle.updateEndEpoch();
+
+                updateTotal();
             });
 
             $('#end_epoch').change(function() {
-                paymentCycle.selectedPeriods = $('#end_epoch').find(':selected').data('index');
-
-                var payment_amount = parseInt($('#payment_amount').val());
-                var periods = parseInt(paymentCycle.selectedPeriods+1);
-
-                $('#total_amount').text(payment_amount * periods);
+                updateTotal();
             });
 
             $('#payment_amount').change(function() {
-                paymentCycle.selectedPeriods = $('#end_epoch').find(':selected').data('index');
-                
-                var payment_amount = parseInt($('#payment_amount').val());
-                var periods = parseInt(paymentCycle.selectedPeriods+1);
-
-                $('#total_amount').text(payment_amount * periods);
+                updateTotal();
             });
 
             $("#time").val(Math.floor((new Date).getTime() / 1000));
