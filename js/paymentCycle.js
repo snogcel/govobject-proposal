@@ -100,12 +100,17 @@ PaymentCycle.prototype.updateDropdowns = function() {
         var superblock = this.getNextSuperblock(blockHeight);
         var timestamp = this.getBlockTimestamp(superblock);
 
+        var before = this.getBlockTimestamp((superblock-(this.paymentCycle/2)));
+        var after = this.getBlockTimestamp((superblock+(this.paymentCycle/2)));
+
         var label = new Date(timestamp).toLocaleDateString();
         if (this.network == 'testnet') label += " @ " + new Date(timestamp).toLocaleTimeString();
 
         var superblockDate = {
             superblock: superblock,
             timestamp: timestamp,
+            before: before,
+            after: after,
             label: label
         };
         this.startDate.push(superblockDate);
@@ -115,8 +120,8 @@ PaymentCycle.prototype.updateDropdowns = function() {
 
     }
 
-    this.endDate.shift(); // remove first element of endDate
-    this.startDate.pop(); // remove last element of startDate to keep length even
+    // this.endDate.shift(); // remove first element of endDate
+    // this.startDate.pop(); // remove last element of startDate to keep length even
 
     var now = Math.floor(Date.now());
 
@@ -132,7 +137,7 @@ PaymentCycle.prototype.updateDropdowns = function() {
 
         var eta = self.getTimeDifference(opts, now, this.timestamp);
         var time = this.timestamp - now;
-        var option = $("<option />").val((Math.floor(this.timestamp / 1000))).text(this.label).attr('data-index', index).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
+        var option = $("<option />").val((Math.floor(this.before / 1000))).text(this.label).attr('data-index', index).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
         start_epoch.append(option);
 
     });
@@ -150,6 +155,9 @@ PaymentCycle.prototype.updateEndEpoch = function() {
 
     var end_epoch = $("#end_epoch");
     end_epoch.find('option').remove();
+
+    var i = 1;
+
     $.each(this.endDate, function(index) {
 
         if(index >= self.selectedStartIndex) {
@@ -157,10 +165,14 @@ PaymentCycle.prototype.updateEndEpoch = function() {
             var eta = self.getTimeDifference(opts, self.startDate[self.selectedStartIndex].timestamp, this.timestamp);
             var time = this.timestamp - self.startDate[self.selectedStartIndex].timestamp;
 
-            var option = $("<option />").val((Math.floor(this.timestamp / 1000))).text(this.label).attr('data-index', index).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
+            var option = $("<option />").val((Math.floor(this.after / 1000))).text((i)+" Payment").attr('data-index', index).attr('data-label', this.label).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
             end_epoch.append(option);
 
+            i++;
+
         }
+
+
 
     });
 
