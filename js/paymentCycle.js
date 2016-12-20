@@ -15,8 +15,8 @@ function PaymentCycle(gov, provider) {
     this.selectedStartIndex = 0;
     this.selectedPeriods = 1;
 
-    if (this.network == 'testnet') this.paymentCycle = 24;
-    if (this.network == 'testnet') this.budgetCycles = 96;
+    if (this.network == 'testnet') this.paymentCycle = 23;
+    if (this.network == 'testnet') this.budgetCycles = 99;
 
     this.blockHeight = null;
 
@@ -25,6 +25,8 @@ function PaymentCycle(gov, provider) {
 
     this.Messages = {
         paymentCycle: {
+            payment: "Payment",
+            payments: "Payments",
             months: "Months",
             month: "Month",
             days: "Days",
@@ -157,15 +159,18 @@ PaymentCycle.prototype.updateEndEpoch = function() {
     end_epoch.find('option').remove();
 
     var i = 1;
+    var payments = self.Messages.paymentCycle.payment;
 
     $.each(this.endDate, function(index) {
 
         if(index >= self.selectedStartIndex) {
 
+            if (i > 1) payments = self.Messages.paymentCycle.payments;
+
             var eta = self.getTimeDifference(opts, self.startDate[self.selectedStartIndex].timestamp, this.timestamp);
             var time = this.timestamp - self.startDate[self.selectedStartIndex].timestamp;
 
-            var option = $("<option />").val((Math.floor(this.after / 1000))).text((i)+" Payment").attr('data-index', index).attr('data-label', this.label).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
+            var option = $("<option />").val((Math.floor(this.after / 1000))).text((i+" "+payments)).attr('data-index', index).attr('data-label', this.label).attr('data-time', time).attr('data-eta', eta).attr('data-block', this.superblock);
             end_epoch.append(option);
 
             i++;
