@@ -65,9 +65,14 @@
             paymentCycle.selectedPeriods = $('#end_epoch').find(':selected').data('index');
 
             var payment_amount = parseInt($('#payment_amount').val());
+            if (isNaN(payment_amount)) payment_amount = 0;
+            
             var periods = parseInt((paymentCycle.selectedPeriods+1)-paymentCycle.selectedStartIndex);
 
+            var label = $('#end_epoch').find(':selected').data('label');
+
             $('#total_amount').text(payment_amount * periods);
+            $('#total_amount_due').text(" with a final payment on " + label);
         };
 
         $(document).ready(function() {
@@ -250,10 +255,10 @@
         </div>
       </div>
       <ul class="nav nav-pills">
-        <li class="active"><a id="step_one" data-toggle="tab" href="#step1">Form</a></li>
-        <li><a id="step_two" data-toggle="tab" href="#step2">Commands</a></li>
-        <li><a id="step_three" data-toggle="tab" href="#step3">Progress</a></li>
-        <li><a id="step_four" data-toggle="tab" href="#step4">Complete</a></li>
+        <li class="active"><a id="step_one" data-toggle="tab" href="#step1">Create a Proposal</a></li>
+        <li><a id="step_two" data-toggle="tab" href="#step2">Wallet Commands</a></li>
+        <li><a id="step_three" data-toggle="tab" href="#step3">Confirm Transaction</a></li>
+        <li><a id="step_four" data-toggle="tab" href="#step4">Submit Proposal</a></li>
       </ul>
     </div>
   </div>
@@ -314,7 +319,7 @@
                   <div class="row">
                     <div class="col-xs-3">
                       <div class="form-group">
-                          <label for="start_epoch">First Payment:</label>
+                          <label for="start_epoch">Voting Deadline:</label>
                           <select name="start_epoch" class="form-control" id="start_epoch"></select>
                       </div>
                     </div>
@@ -326,7 +331,7 @@
                       <!--  -->
                       <!-- The following form group is a placeholder for proposal end time. Please change to the correct id. -->
                       <div class="form-group">
-                          <label for="start_epoch">Last Payment:</label>
+                          <label for="start_epoch">Payments:</label>
                           <select name="start_epoch" class="form-control" id="end_epoch"></select>
                       </div>
                       <!--  -->
@@ -363,7 +368,7 @@
                         <div class="col-xs-12">
                             <div class="form-group">
                                 <label for="total_amount">Total Amount: </label>
-                                <span id="total_amount">0</span> <span>DASH</span>
+                                <span id="total_amount">0</span> <span>DASH</span> <span id="total_amount_due"></span>
                             </div>
                         </div>
                     </div>
