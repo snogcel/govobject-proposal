@@ -53,6 +53,11 @@ i.fa {
 
 }
 
+#dash_logo {
+  width: 150px;
+  height: auto;
+}
+
 #header {
   margin-top:2em;
 }
