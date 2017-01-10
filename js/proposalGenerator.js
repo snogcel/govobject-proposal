@@ -27,7 +27,7 @@ ProposalGenerator.prototype.validate = function() {
             case 'Invalid Name':
                 console.log("error: invalid name");
                 $('#name').addClass('validationError');
-                $('#name').val("Invalid name. Please enter a name without spaces and weird characters. E.g. can use a '-' or '_' instead of a space.");
+                $('#name').val("Invalid name. Please enter a 40 character alphanumeric name without spaces.");
                 break;
 
             case 'Invalid URL':
@@ -39,7 +39,7 @@ ProposalGenerator.prototype.validate = function() {
             case 'Invalid Payment Amount':
                 console.log("Error: invalid payment amount");
                 $('#payment_amount').addClass('validationError');
-                $('#payment_amount').val("Invalid payment amount. Please enter a number from 1 - 7500");
+                // $('#payment_amount').val("Invalid payment amount.");
                 break;
 
             case 'Invalid Timespan':
@@ -60,7 +60,7 @@ ProposalGenerator.prototype.validate = function() {
             case 'Invalid Address':
                 console.log("Error: invalid address");
                 $('#payment_address').addClass('validationError');
-                $('#payment_address').val("Invalid Dash Address. Please just copy & paste from wallet.");
+                $('#payment_address').val("Invalid payment address.");
                 break;
 
             default:
