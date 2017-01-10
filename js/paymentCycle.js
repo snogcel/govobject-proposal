@@ -9,13 +9,15 @@ function PaymentCycle(gov, provider) {
 
     this.network = gov.network;
     this.provider = provider;
-    this.paymentCycle = 16616; // mainnet
+    this.paymentCycle = 16616;
+    this.proposalMaturity = 1662 + 10; // ~(60*24*3)/2.6 = about three days
     this.budgetCycles = 24;
 
     this.selectedStartIndex = 0;
     this.selectedPeriods = 1;
 
     if (this.network == 'testnet') this.paymentCycle = 23;
+    if (this.network == 'testnet') this.proposalMaturity = 24 + 1; // a little more than one hour
     if (this.network == 'testnet') this.budgetCycles = 99;
 
     this.blockHeight = null;
@@ -96,14 +98,15 @@ PaymentCycle.prototype.updateDropdowns = function() {
     var self = this;
 
     var blockHeight = this.blockHeight;
+    var now = Math.floor(Date.now());
 
     for (i = 0; i < this.budgetCycles + 1; i++) {
 
         var superblock = this.getNextSuperblock(blockHeight);
         var timestamp = this.getBlockTimestamp(superblock);
 
-        var before = this.getBlockTimestamp((superblock-(this.paymentCycle/2)));
-        var after = this.getBlockTimestamp((superblock+(this.paymentCycle/2)));
+        var before = this.getBlockTimestamp((superblock-this.proposalMaturity));
+        var after = this.getBlockTimestamp((superblock+(this.paymentCycle/2))); // set end_epoch to halfway after the last superblock
 
         var label = new Date(timestamp).toLocaleDateString();
         if (this.network == 'testnet') label += " @ " + new Date(timestamp).toLocaleTimeString();
@@ -115,8 +118,12 @@ PaymentCycle.prototype.updateDropdowns = function() {
             after: after,
             label: label
         };
-        this.startDate.push(superblockDate);
-        this.endDate.push(superblockDate);
+
+        // include superblock if proposal maturity date is later than now
+        if (superblockDate.before > now) {
+            this.startDate.push(superblockDate);
+            this.endDate.push(superblockDate);
+        }
 
         blockHeight = superblock;
 
@@ -124,8 +131,6 @@ PaymentCycle.prototype.updateDropdowns = function() {
 
     // this.endDate.shift(); // remove first element of endDate
     // this.startDate.pop(); // remove last element of startDate to keep length even
-
-    var now = Math.floor(Date.now());
 
     var opts = {
         precision: 2
