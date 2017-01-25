@@ -131,6 +131,7 @@
 
                 if (validProposal) {
                     document.getElementById('step_two').click();
+                    $('#step_two').removeClass('hidden');
                     document.getElementsByClassName('progress-bar')[0].style.width = "50%";
                     document.getElementsByClassName('progress-bar')[0].innerText = "Generated wallet commands";
                     $('#network_toggle').addClass('hidden');
@@ -146,6 +147,12 @@
                     $('#btnNew').click(function() {
                         proposal.resetProposal();
                         $('#network_toggle').removeClass('hidden');
+
+                        $('#step_two').addClass('hidden');
+                        $('#step_three').addClass('hidden');
+                        $('#step_four').addClass('hidden');
+                        document.getElementsByClassName('progress-bar')[0].style.width = "25%";
+                        document.getElementsByClassName('progress-bar')[0].innerText = "Create Proposal";
                     });
                 }
             });
@@ -179,6 +186,7 @@
 
                         // transaction exists, proceed to step three
                         document.getElementById('step_three').click();
+                        $('#step_three').removeClass('hidden');
                         document.getElementsByClassName('progress-bar')[0].style.width = "75%";
                         document.getElementsByClassName('progress-bar')[0].innerText = "Awaiting transaction confirmation";
 
@@ -191,6 +199,7 @@
                         txListener.initSocket(function() {
                             $('#walletCommandsSubmit').removeClass('hidden');
                             document.getElementById('step_four').click();
+                            $('#step_four').removeClass('hidden');
                             document.getElementsByClassName('progress-bar')[0].style.width = "100%";
                             document.getElementsByClassName('progress-bar')[0].innerText = "Proposal ready for submission";
                             console.log($('#feeTxid').val());
@@ -258,14 +267,14 @@
       <div class="progress">
         <div class="progress-bar" role="progressbar" aria-valuenow="25"
         aria-valuemin="0" aria-valuemax="100" style="width:25%">
-          Create proposal
+          Create Proposal
         </div>
       </div>
       <ul class="nav nav-pills">
         <li class="active"><a id="step_one" data-toggle="tab" href="#step1">Create a Proposal</a></li>
-        <li><a id="step_two" data-toggle="tab" href="#step2">Wallet Commands</a></li>
-        <li><a id="step_three" data-toggle="tab" href="#step3">Confirm Transaction</a></li>
-        <li><a id="step_four" data-toggle="tab" href="#step4">Submit Proposal</a></li>
+        <li><a id="step_two" class="hidden" data-toggle="tab" href="#step2">Wallet Commands</a></li>
+        <li><a id="step_three" class="hidden" data-toggle="tab" href="#step3">Confirm Transaction</a></li>
+        <li><a id="step_four" class="hidden" data-toggle="tab" href="#step4">Submit Proposal</a></li>
       </ul>
     </div>
   </div>
@@ -305,7 +314,7 @@
                 <div class="row" id="createProposalHeader">
                     <div class="col-xs-12">
                         <h1 class="removeMargin">Create a Proposal</h1>
-                        <h5 class="header_description">Enter details for your proposal and click 'Create Proposal'.  This will generate a command you can run in your local wallet to prepare the proposal at a cost of 0.33 DASH</h5>
+                        <h5 class="header_description">Enter details for your proposal and click 'Create Proposal'.  This will generate a command you can run in your local wallet to prepare the proposal at a cost of 0.33 DASH.</h5>
                     </div>
                 </div>
 
@@ -326,7 +335,7 @@
                   <div class="row">
                     <div class="col-xs-3">
                       <div class="form-group">
-                          <label for="start_epoch">Voting Deadline:</label>
+                          <label for="start_epoch">Payment Date:</label>
                           <select name="start_epoch" class="form-control" id="start_epoch"></select>
                       </div>
                     </div>
