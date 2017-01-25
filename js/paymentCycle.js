@@ -4,23 +4,24 @@
  * @param gov
  * @constructor
  */
-function PaymentCycle(gov, provider) {
+function PaymentCycle(gov, provider, prefix) {
     var self = this;
 
     this.network = gov.network;
     this.provider = provider;
+    this.prefix = prefix;
     this.paymentCycle = 16616;
-    this.proposalMaturity = 1662 + 10; // ~(60*24*3)/2.6 = about three days
+    this.proposalMaturity = 1662; // ~(60*24*3)/2.6 = about three days
     this.budgetCycles = 24;
 
     this.selectedStartIndex = 0;
     this.selectedPeriods = 1;
 
     if (this.network == 'testnet') this.paymentCycle = 23;
-    if (this.network == 'testnet') this.proposalMaturity = 24 + 1; // a little more than one hour
+    if (this.network == 'testnet') this.proposalMaturity = 24; // a little more than one hour
     if (this.network == 'testnet') this.budgetCycles = 99;
 
-    this.blockHeight = null;
+    this.blockHeight = 0;
 
     this.startDate = [];
     this.endDate = [];
@@ -42,10 +43,11 @@ function PaymentCycle(gov, provider) {
         }
     };
 
-    this.getInfo(function(err,res) {
-        console.log("current blockheight: " + res.info.blocks);
-
+    this.getInfo(function(err, res) {
         self.blockHeight = res.info.blocks;
+        console.log("current blockheight: " + self.blockHeight);
+
+        self.updateDropdowns();
     });
 }
 
@@ -105,8 +107,10 @@ PaymentCycle.prototype.updateDropdowns = function() {
         var superblock = this.getNextSuperblock(blockHeight);
         var timestamp = this.getBlockTimestamp(superblock);
 
-        var before = this.getBlockTimestamp((superblock-this.proposalMaturity));
-        var after = this.getBlockTimestamp((superblock+(this.paymentCycle/2))); // set end_epoch to halfway after the last superblock
+        var before = this.getBlockTimestamp((superblock-(this.paymentCycle/2))); // set start_epoch to halfway before superblock
+        var after = this.getBlockTimestamp((superblock+(this.paymentCycle/2))); // set end_epoch to halfway after superblock
+
+        var votingDeadline = this.getBlockTimestamp((superblock-this.proposalMaturity)); // if superblock is within ~3 days skip to the next one
 
         var label = new Date(timestamp).toLocaleDateString();
         if (this.network == 'testnet') label += " @ " + new Date(timestamp).toLocaleTimeString();
@@ -120,7 +124,7 @@ PaymentCycle.prototype.updateDropdowns = function() {
         };
 
         // include superblock if proposal maturity date is later than now
-        if (superblockDate.before > now) {
+        if (votingDeadline > now) {
             this.startDate.push(superblockDate);
             this.endDate.push(superblockDate);
         }
@@ -189,7 +193,7 @@ PaymentCycle.prototype.updateEndEpoch = function() {
 };
 
 PaymentCycle.prototype.getInfo = function(cb) {
-    $.getJSON(this.provider + "insight-api-dash/status?q=getinfo", function( data ) {
+    $.getJSON(this.provider + this.prefix + "/status?q=getinfo", function( data ) {
         cb(null, data);
     });
 };

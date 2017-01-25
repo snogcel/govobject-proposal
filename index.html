@@ -36,15 +36,17 @@
         var socket;
         var paymentCycle;
 
-        var mainnetProvider = 'https://dev-test.dash.org/';
-        var testnetProvider = 'https://dev-test.dash.org/';
+        var mainnetProvider = 'http://insight.dev.dash.org';
+        var mainnetPrefix = '/api';
 
-        var init = function(network, provider) {
+        var testnetProvider = 'http://test-insight.dev.dash.org';
+        var testnetPrefix = '/insight-api-dash';
+
+        var init = function(network, provider, prefix) {
             var gov = new Bitcore.GovObject.Proposal();
             gov.network = network || 'testnet';
 
-            paymentCycle = new PaymentCycle(gov, provider);
-            paymentCycle.updateDropdowns();
+            paymentCycle = new PaymentCycle(gov, provider, prefix);
 
             socket = io(provider);
 
@@ -77,10 +79,10 @@
 
         $(document).ready(function() {
 
-            var gov = init('testnet', testnetProvider); // default network;
+            var gov = init('testnet', testnetProvider, testnetPrefix); // default network;
 
-            $('#mainnet').change(function() { gov = init('mainnet', mainnetProvider); });
-            $('#testnet').change(function() { gov = init('testnet', testnetProvider); });
+            $('#mainnet').change(function() { gov = init('mainnet', mainnetProvider, mainnetPrefix); });
+            $('#testnet').change(function() { gov = init('testnet', testnetProvider, testnetPrefix); });
 
             $('#start_epoch').change(function() {
                 paymentCycle.selectedStartIndex = $('#start_epoch').find(':selected').data('index');
