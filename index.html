@@ -162,7 +162,7 @@
                 var proposal = new ProposalGenerator(gov);
 
                 var transaction = $(this).val();
-                var txListener = new TXListener(socket, paymentCycle.provider, transaction);
+                var txListener = new TXListener(socket, paymentCycle.provider, paymentCycle.prefix, transaction);
 
                 // check if tx exists in insight
                 txListener.getTx(function(err, res) {

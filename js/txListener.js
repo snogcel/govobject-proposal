@@ -1,7 +1,8 @@
-function TXListener(socket, provider, transaction) {
+function TXListener(socket, provider, prefix, transaction) {
 
     this.socket = socket;
     this.provider = provider;
+    this.prefix = prefix;
     this.transaction = transaction;
 
     this.blockheight = null;
@@ -40,7 +41,7 @@ TXListener.prototype.getTx = function(cb) {
 
     var opts = {
         type: "GET",
-        route: "insight-api-dash/tx/"+txid,
+        route: "/tx/"+txid,
         data: {
             format: "json"
         }
@@ -53,7 +54,7 @@ TXListener.prototype.getBlock = function(hash, cb) {
 
     var opts = {
         type: "GET",
-        route: "insight-api-dash/block/"+hash,
+        route: "/block/"+hash,
         data: {
             format: "json"
         }
@@ -65,12 +66,13 @@ TXListener.prototype.getBlock = function(hash, cb) {
 TXListener.prototype._fetch = function(opts,cb) {
     var self = this;
     var provider = opts.provider || self.provider;
+    var prefix = opts.prefix || self.prefix;
 
     if(opts.type && opts.route && opts.data) {
 
         jQuery.ajax({
             type: opts.type,
-            url: provider + opts.route,
+            url: provider + prefix + opts.route,
             data: JSON.stringify(opts.data),
             contentType: "application/json; charset=utf-8",
             crossDomain: true,
