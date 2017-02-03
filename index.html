@@ -44,7 +44,7 @@
 
         var init = function(network, provider, prefix) {
             var gov = new Bitcore.GovObject.Proposal();
-            gov.network = network || 'testnet';
+            gov.network = network || 'mainnet';
 
             paymentCycle = new PaymentCycle(gov, provider, prefix);
 
@@ -79,7 +79,7 @@
 
         $(document).ready(function() {
 
-            var gov = init('testnet', testnetProvider, testnetPrefix); // default network;
+            var gov = init('mainnet', mainnetProvider, mainnetPrefix); // default network;
 
             $('#mainnet').change(function() { gov = init('mainnet', mainnetProvider, mainnetPrefix); });
             $('#testnet').change(function() { gov = init('testnet', testnetProvider, testnetPrefix); });
@@ -300,11 +300,11 @@
             <div class="row">
               <div class="col-xs-offset-8 col-xs-4">
                 <div id="network_toggle" class="btn-group" data-toggle="buttons">
-                    <label class="btn btn-primary">
-                        <input type="radio" name="options" id="mainnet" autocomplete="off"> Mainnet
-                    </label>
                     <label class="btn btn-primary active">
-                        <input type="radio" name="options" id="testnet" autocomplete="off" checked> Testnet
+                        <input type="radio" name="options" id="mainnet" autocomplete="off" checked> Mainnet
+                    </label>
+                    <label class="btn btn-primary">
+                        <input type="radio" name="options" id="testnet" autocomplete="off"> Testnet
                     </label>
                 </div>
               </div>
