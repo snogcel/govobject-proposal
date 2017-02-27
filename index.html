@@ -8,7 +8,7 @@
     <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 
-    <script src="bitcore-lib-dash.js"></script>
+    <script src="./bitcore-lib-dash.js"></script>
 
     <script src="vendor/jquery/jquery-3.1.1.min.js"></script>
 
@@ -126,7 +126,8 @@
             $('#btnPrepare').click(function() {
 
                 var proposal = new ProposalGenerator(gov);
-
+                console.log("prop.validate", proposal.validate); 
+                //****
                 var validProposal = proposal.validate();
 
                 if (validProposal) {
@@ -211,6 +212,19 @@
                     }
                 });
             });
+        });
+        $('#name').on('input', function() {
+            var proposalName = $('#name').val();
+            var nameregex = /^[-_a-zA-Z0-9]{1,40}$/;
+            var isValid=nameregex.test(proposalName);
+            if (!isValid){
+              $('#name').addClass("validationError");
+              $('#btnPrepare').prop("disabled", true);
+            }else{
+              $('#name').removeClass("validationError");
+              $('#btnPrepare').prop("disabled", false);
+              $('#url').val("https://www.dashcentral.org/p/"+proposalName);
+            }
         });
     </script>
 
@@ -503,6 +517,7 @@
 
   </div>
 </div>
-
 </body>
 </html>
+
+

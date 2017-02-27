@@ -18,6 +18,7 @@ function ProposalGenerator(gov) {
 
 ProposalGenerator.prototype.validate = function() {
     try {
+        console.log('gov.serialize', this.gov.serialize) //****
         var gov = this.gov.serialize();
     }
     catch (e) {
