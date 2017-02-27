@@ -213,19 +213,6 @@
                 });
             });
         });
-        $('#name').on('input', function() {
-            var proposalName = $('#name').val();
-            var nameregex = /^[-_a-zA-Z0-9]{1,40}$/;
-            var isValid=nameregex.test(proposalName);
-            if (!isValid){
-              $('#name').addClass("validationError");
-              $('#btnPrepare').prop("disabled", true);
-            }else{
-              $('#name').removeClass("validationError");
-              $('#btnPrepare').prop("disabled", false);
-              $('#url').val("https://www.dashcentral.org/p/"+proposalName);
-            }
-        });
     </script>
 
 </head>
@@ -517,6 +504,22 @@
 
   </div>
 </div>
+<script>
+$('#name').on('input', function() {
+  var proposalName = $('#name').val();
+              console.log(proposalName)
+  var nameregex = /^[-_a-zA-Z0-9]{1,40}$/;
+  var isValid=nameregex.test(proposalName);
+  if (!isValid){
+    $('#name').addClass("validationError");
+    $('#btnPrepare').prop("disabled", true);
+  }else{
+    $('#name').removeClass("validationError");
+    $('#btnPrepare').prop("disabled", false);
+  }
+      $('#url').val("https://www.dashcentral.org/p/"+proposalName);
+});
+</script>
 </body>
 </html>
 
