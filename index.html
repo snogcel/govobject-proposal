@@ -126,8 +126,6 @@
             $('#btnPrepare').click(function() {
 
                 var proposal = new ProposalGenerator(gov);
-                console.log("prop.validate", proposal.validate); 
-                //****
                 var validProposal = proposal.validate();
 
                 if (validProposal) {
